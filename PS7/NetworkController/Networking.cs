@@ -24,6 +24,7 @@ public static class Networking
         SocketState tempState = new SocketState(toCall, new Socket(IPAddress.Any.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
         Tuple<TcpListener, Action<SocketState>> storage = new Tuple<TcpListener, Action<SocketState>>(server, toCall);
         server.Start();
+        Console.WriteLine("Server has been started");
         server.BeginAcceptSocket(AcceptNewClient, storage);
         return server;
     }
@@ -63,7 +64,7 @@ public static class Networking
             SocketState error = new SocketState(state, "Error accepting new client (Server)");
             return;
         }
-
+        Console.WriteLine("Client accepted");
         server.BeginAcceptSocket(AcceptNewClient, new Tuple<TcpListener, Action<SocketState>>(server, state));
     }
 
