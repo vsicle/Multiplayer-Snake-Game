@@ -20,8 +20,12 @@ public static class Networking
     /// <param name="port">The the port to listen on</param>
     public static TcpListener StartServer(Action<SocketState> toCall, int port)
     {
-
-        throw new NotImplementedException();
+        TcpListener server = new TcpListener(IPAddress.Any, port);
+        SocketState tempState = new SocketState(toCall, new Socket(IPAddress.Any.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
+        Tuple<TcpListener, Action<SocketState>> storage = new Tuple<TcpListener, Action<SocketState>>(server, toCall);
+        server.Start();
+        server.BeginAcceptSocket(AcceptNewClient, storage);
+        return server;
     }
 
     /// <summary>
@@ -44,7 +48,23 @@ public static class Networking
     /// 1) a delegate so the user can take action (a SocketState Action), and 2) the TcpListener</param>
     private static void AcceptNewClient(IAsyncResult ar)
     {
-        throw new NotImplementedException();
+        Tuple<TcpListener, Action<SocketState>> incoming = (Tuple<TcpListener, Action<SocketState>>)ar.AsyncState!;
+        TcpListener server = incoming.Item1;
+        Action<SocketState> state = incoming.Item2;
+
+        try
+        {
+            Socket socket = server.EndAcceptSocket(ar);
+            SocketState newState = new SocketState(state, socket);
+            newState.OnNetworkAction(newState);
+        }
+        catch(Exception)
+        {
+            SocketState error = new SocketState(state, "Error accepting new client (Server)");
+            return;
+        }
+
+        server.BeginAcceptSocket(AcceptNewClient, new Tuple<TcpListener, Action<SocketState>>(server, state));
     }
 
     /// <summary>
@@ -52,7 +72,7 @@ public static class Networking
     /// </summary>
     public static void StopServer(TcpListener listener)
     {
-        throw new NotImplementedException();
+        listener.Stop();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////
