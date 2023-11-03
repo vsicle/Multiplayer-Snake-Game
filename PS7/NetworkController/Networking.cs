@@ -20,6 +20,7 @@ public static class Networking
     /// <param name="port">The the port to listen on</param>
     public static TcpListener StartServer(Action<SocketState> toCall, int port)
     {
+
         throw new NotImplementedException();
     }
 
@@ -99,6 +100,12 @@ public static class Networking
             if (!foundIPV4)
             {
                 // TODO: Indicate an error to the user, as specified in the documentation
+             
+                SocketState ErrorSocketState = new SocketState(toCall, "IPV4 address not found");
+
+                ErrorSocketState.OnNetworkAction.Invoke(ErrorSocketState);
+        
+                return;            
             }
         }
         catch (Exception)
@@ -111,6 +118,10 @@ public static class Networking
             catch (Exception)
             {
                 // TODO: Indicate an error to the user, as specified in the documentation
+
+                SocketState ErrorSocketState = new SocketState(toCall, "Invalid host name");
+                ErrorSocketState.OnNetworkAction.Invoke(ErrorSocketState);
+                return;
             }
         }
 
@@ -123,6 +134,10 @@ public static class Networking
         socket.NoDelay = true;
 
         // TODO: Finish the remainder of the connection process as specified.
+
+        SocketState ClientConnect = new SocketState(toCall, socket);
+        ClientConnect.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ClientConnect);
+
     }
 
     /// <summary>
@@ -140,7 +155,26 @@ public static class Networking
     /// <param name="ar">The object asynchronously passed via BeginConnect</param>
     private static void ConnectedCallback(IAsyncResult ar)
     {
-        throw new NotImplementedException();
+
+        SocketState temp = (SocketState)ar.AsyncState!;
+        
+        try
+        {
+            temp.TheSocket.EndConnect(ar);
+
+        } catch (Exception ex)
+        {
+            
+            temp.ErrorOccurred = true;
+            temp.ErrorMessage = ex.Message;
+            //SocketState ErrorSocketState = new SocketState(temp.OnNetworkAction, temp.ErrorMessage);
+            //temp.OnNetworkAction.Invoke(temp);
+
+        }
+        // Calls delegate once connection has been established.
+        temp.OnNetworkAction(temp);
+        
+        
     }
 
 
@@ -161,6 +195,12 @@ public static class Networking
     /// <param name="state">The SocketState to begin receiving</param>
     public static void GetData(SocketState state)
     {
+        /*
+        try
+        {
+            state.TheSocket.BeginReceive(state.buffer, 0, state.buffer.Length, state.OnNetworkAction(state), state);
+        }
+        */
         throw new NotImplementedException();
     }
 
