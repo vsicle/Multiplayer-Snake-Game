@@ -51,7 +51,7 @@ public static class Networking
     /// 1) a delegate so the user can take action (a SocketState Action), and 2) the TcpListener</param>
     private static void AcceptNewClient(IAsyncResult ar)
     {
-        Tuple<TcpListener, Action<SocketState>> incoming = (Tuple<TcpListener, Action<SocketState>>)ar.AsyncState;
+        Tuple<TcpListener, Action<SocketState>> incoming = (Tuple<TcpListener, Action<SocketState>>)ar.AsyncState!;
 
         TcpListener server = incoming.Item1;
         Action<SocketState> toCall = incoming.Item2;
@@ -139,10 +139,10 @@ public static class Networking
             {
                 ipAddress = IPAddress.Parse(hostName);
             }
-            catch (Exception)
+            catch
             {
                 // TODO: Indicate an error to the user, as specified in the documentation
-
+                
                 SocketState ErrorSocketState = new SocketState(toCall, "Invalid host name");
                 ErrorSocketState.OnNetworkAction.Invoke(ErrorSocketState);
                 return;
@@ -182,7 +182,7 @@ public static class Networking
     private static void ConnectedCallback(IAsyncResult ar)
     {
 
-        SocketState temp = (SocketState)ar.AsyncState;
+        SocketState temp = (SocketState)ar.AsyncState!;
         
         try
         {
@@ -224,12 +224,13 @@ public static class Networking
         
         try
         {
-            state.TheSocket.BeginReceive(state.buffer, 0, state.buffer.Length, state.OnNetworkAction(state), state);
+            state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
         }
         catch
         {
             // DO SOMETHING 
             // UNIMPLEMENTED
+            return;
         }
         
     }
@@ -253,7 +254,7 @@ public static class Networking
     /// </param>
     private static void ReceiveCallback(IAsyncResult ar)
     {
-        SocketState state = (SocketState)ar.AsyncState;
+        SocketState state = (SocketState)ar.AsyncState!;
 
         try
         {
@@ -264,10 +265,10 @@ public static class Networking
                 state.data.Append(Encoding.UTF8.GetString(state.buffer, 0, numBytes));
             }
         }
-        catch ()
+        catch
         {
             state.ErrorOccurred = true;
-            state.ErrorMessage = "Couldn't recieve data, possibly wrong format."
+            state.ErrorMessage = "Couldn't recieve data, possibly wrong format.";
         }
 
         state.OnNetworkAction(state);
@@ -295,7 +296,7 @@ public static class Networking
             // if we get down to here, it means starting the send was successful
                 return true;
         }
-        catch ()
+        catch
         {
             // sending failed, close socket and return false for unsuccessful send
             socket.Close();
@@ -316,13 +317,13 @@ public static class Networking
     /// </param>
     private static void SendCallback(IAsyncResult ar)
     {
-        Socket socket = (Socket)ar.AsyncState;
+        Socket socket = (Socket)ar.AsyncState!;
 
         try
         {
             socket.EndSend(ar);
         }
-        catch()
+        catch
         {
             // Don't do anything, per spec
             return;
