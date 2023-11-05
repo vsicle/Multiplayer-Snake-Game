@@ -253,7 +253,24 @@ public static class Networking
     /// </param>
     private static void ReceiveCallback(IAsyncResult ar)
     {
-        throw new NotImplementedException();
+        SocketState state = (SocketState)ar.AsyncState;
+
+        try
+        {
+            int numBytes = state.TheSocket.EndReceive(ar);
+
+            lock (state)
+            {
+                state.data.Append(Encoding.UTF8.GetString(state.buffer, 0, numBytes));
+            }
+        }
+        catch ()
+        {
+            state.ErrorOccurred = true;
+            state.ErrorMessage = "Couldn't recieve data, possibly wrong format."
+        }
+
+        state.OnNetworkAction(state);
     }
 
     /// <summary>
@@ -268,7 +285,16 @@ public static class Networking
     /// <returns>True if the send process was started, false if an error occurs or the socket is already closed</returns>
     public static bool Send(Socket socket, string data)
     {
-        throw new NotImplementedException();
+        byte[] package = Encoding.UTF8.GetBytes(data);
+
+        try
+        {
+
+        }
+        catch ()
+        {
+
+        }
     }
 
     /// <summary>
