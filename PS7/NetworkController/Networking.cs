@@ -289,11 +289,17 @@ public static class Networking
 
         try
         {
+            // start the sending
+            socket.BeginSend(package, 0, package.Length, SocketFlags.None, SendCallback, socket);
 
+            // if we get down to here, it means starting the send was successful
+                return true;
         }
         catch ()
         {
-
+            // sending failed, close socket and return false for unsuccessful send
+            socket.Close();
+            return false;
         }
     }
 
@@ -310,7 +316,17 @@ public static class Networking
     /// </param>
     private static void SendCallback(IAsyncResult ar)
     {
-        throw new NotImplementedException();
+        Socket socket = (Socket)ar.AsyncState;
+
+        try
+        {
+            socket.EndSend(ar);
+        }
+        catch()
+        {
+            // Don't do anything, per spec
+            return;
+        }
     }
 
 
