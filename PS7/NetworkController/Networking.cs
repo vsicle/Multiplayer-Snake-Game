@@ -123,7 +123,6 @@ public static class Networking
             // Didn't find any IPV4 addresses
             if (!foundIPV4)
             {
-                // TODO: Indicate an error to the user, as specified in the documentation
              
                 SocketState ErrorSocketState = new SocketState(toCall, "IPV4 address not found");
 
