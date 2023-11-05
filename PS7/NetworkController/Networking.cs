@@ -21,10 +21,13 @@ public static class Networking
     public static TcpListener StartServer(Action<SocketState> toCall, int port)
     {
         TcpListener server = new TcpListener(IPAddress.Any, port);
-        SocketState tempState = new SocketState(toCall, new Socket(IPAddress.Any.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
+
         Tuple<TcpListener, Action<SocketState>> storage = new Tuple<TcpListener, Action<SocketState>>(server, toCall);
+
         server.Start();
+
         server.BeginAcceptSocket(AcceptNewClient, storage);
+
         return server;
     }
 
@@ -48,23 +51,25 @@ public static class Networking
     /// 1) a delegate so the user can take action (a SocketState Action), and 2) the TcpListener</param>
     private static void AcceptNewClient(IAsyncResult ar)
     {
-        Tuple<TcpListener, Action<SocketState>> incoming = (Tuple<TcpListener, Action<SocketState>>)ar.AsyncState!;
+        Tuple<TcpListener, Action<SocketState>> incoming = (Tuple<TcpListener, Action<SocketState>>)ar.AsyncState;
+
         TcpListener server = incoming.Item1;
-        Action<SocketState> state = incoming.Item2;
+        Action<SocketState> toCall = incoming.Item2;
 
         try
         {
             Socket socket = server.EndAcceptSocket(ar);
-            SocketState newState = new SocketState(state, socket);
-            newState.OnNetworkAction(newState);
+
+            SocketState state = new SocketState(toCall, socket);
+            state.OnNetworkAction(state);
         }
         catch(Exception)
         {
-            SocketState error = new SocketState(state, "Error accepting new client (Server)");
+            SocketState error = new SocketState(toCall, "Server couldn't accept new client.");
             return;
         }
 
-        server.BeginAcceptSocket(AcceptNewClient, new Tuple<TcpListener, Action<SocketState>>(server, state));
+        server.BeginAcceptSocket(AcceptNewClient, new Tuple<TcpListener, Action<SocketState>>(server, toCall));
     }
 
     /// <summary>
@@ -97,8 +102,7 @@ public static class Networking
     /// <param name="port">The port on which the server is listening</param>
     public static void ConnectToServer(Action<SocketState> toCall, string hostName, int port)
     {
-        // TODO: This method is incomplete, but contains a starting point 
-        //       for decoding a host address
+
 
         // Establish the remote endpoint for the socket.
         IPHostEntry ipHostInfo;
@@ -158,6 +162,8 @@ public static class Networking
         SocketState ClientConnect = new SocketState(toCall, socket);
         ClientConnect.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ClientConnect);
 
+        // Should we make a timeout in case a connection isn't made within x seconds?
+
     }
 
     /// <summary>
@@ -176,7 +182,7 @@ public static class Networking
     private static void ConnectedCallback(IAsyncResult ar)
     {
 
-        SocketState temp = (SocketState)ar.AsyncState!;
+        SocketState temp = (SocketState)ar.AsyncState;
         
         try
         {
@@ -215,13 +221,17 @@ public static class Networking
     /// <param name="state">The SocketState to begin receiving</param>
     public static void GetData(SocketState state)
     {
-        /*
+        
         try
         {
             state.TheSocket.BeginReceive(state.buffer, 0, state.buffer.Length, state.OnNetworkAction(state), state);
         }
-        */
-        throw new NotImplementedException();
+        catch
+        {
+            // DO SOMETHING 
+            // UNIMPLEMENTED
+        }
+        
     }
 
     /// <summary>
