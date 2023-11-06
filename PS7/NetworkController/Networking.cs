@@ -240,10 +240,10 @@ public static class Networking
         {
             state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
         }
-        catch // Add (Exception ex) to capture specific error message C# may throw (Lec 18 18:09).
+        catch(Exception e)
         {
-            // DO SOMETHING 
-            // UNIMPLEMENTED
+            state.ErrorOccurred = true;
+            state.ErrorMessage = e.Message;
             return;
         }
         
@@ -284,10 +284,11 @@ public static class Networking
                 state.data.Append(Encoding.UTF8.GetString(state.buffer, 0, numBytes));
             }
         }
-        catch (Exception ex) 
+        catch (Exception e) 
         {
             state.ErrorOccurred = true;
-            state.ErrorMessage = ex.Message;        }
+            state.ErrorMessage = e.Message;        
+        }
 
         state.OnNetworkAction(state);
     }
@@ -316,7 +317,6 @@ public static class Networking
         }
         catch
         {
-            // sending failed, close socket and return false for unsuccessful send
             socket.Close();
             return false;
         }
@@ -362,7 +362,19 @@ public static class Networking
     /// <returns>True if the send process was started, false if an error occurs or the socket is already closed</returns>
     public static bool SendAndClose(Socket socket, string data)
     {
-        throw new NotImplementedException();
+        byte[] package = Encoding.UTF8.GetBytes(data);
+
+        try
+        {
+            socket.BeginSend(package, 0, package.Length, SocketFlags.None, SendAndCloseCallback, socket);
+
+            return true;
+        }
+        catch(Exception)
+        {
+            socket.Close();
+            return false;
+        }
     }
 
     /// <summary>
@@ -380,6 +392,15 @@ public static class Networking
     /// </param>
     private static void SendAndCloseCallback(IAsyncResult ar)
     {
-        throw new NotImplementedException();
+        Socket socket = (Socket )ar.AsyncState!;
+
+        try
+        {
+            socket.EndSend(ar);
+        }
+        catch
+        {            
+        }
+        socket.Close();
     }
 }
