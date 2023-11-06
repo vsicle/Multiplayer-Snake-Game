@@ -159,9 +159,24 @@ public static class Networking
         // TODO: Finish the remainder of the connection process as specified.
 
         SocketState ClientConnect = new SocketState(toCall, socket);
-        ClientConnect.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ClientConnect);
 
-        // Should we make a timeout in case a connection isn't made within x seconds?
+
+        // Timeout in case connection doesn't happen within 3 seconds.
+
+        IAsyncResult result = ClientConnect.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ClientConnect);
+
+        bool success = result.AsyncWaitHandle.WaitOne(3000, true);
+
+        if (socket.Connected)
+        {
+            socket.EndConnect(result);
+        }
+        else
+        {
+            // Triggers Callback
+            socket.Close();
+        }
+
 
     }
 
@@ -225,7 +240,7 @@ public static class Networking
         {
             state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
         }
-        catch
+        catch // Add (Exception ex) to capture specific error message C# may throw (Lec 18 18:09).
         {
             // DO SOMETHING 
             // UNIMPLEMENTED
@@ -259,16 +274,20 @@ public static class Networking
         {
             int numBytes = state.TheSocket.EndReceive(ar);
 
+            if (numBytes == 0) {
+                state.ErrorOccurred = true;
+                state.ErrorMessage = "Clean remote socket shutdown";
+            }
+
             lock (state)
             {
                 state.data.Append(Encoding.UTF8.GetString(state.buffer, 0, numBytes));
             }
         }
-        catch
+        catch (Exception ex) 
         {
             state.ErrorOccurred = true;
-            state.ErrorMessage = "Couldn't recieve data, possibly wrong format.";
-        }
+            state.ErrorMessage = ex.Message;        }
 
         state.OnNetworkAction(state);
     }
