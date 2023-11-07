@@ -20,12 +20,16 @@ public static class Networking
     /// <param name="port">The the port to listen on</param>
     public static TcpListener StartServer(Action<SocketState> toCall, int port)
     {
+        // create a listener for the server
         TcpListener server = new TcpListener(IPAddress.Any, port);
 
+        // put the listener and the "done" method in a tuple to pass them along
         Tuple<TcpListener, Action<SocketState>> storage = new Tuple<TcpListener, Action<SocketState>>(server, toCall);
 
+        // start the listener
         server.Start();
 
+        // start accepting
         server.BeginAcceptSocket(AcceptNewClient, storage);
 
         return server;
@@ -51,23 +55,33 @@ public static class Networking
     /// 1) a delegate so the user can take action (a SocketState Action), and 2) the TcpListener</param>
     private static void AcceptNewClient(IAsyncResult ar)
     {
+
+        // save the tuple
         Tuple<TcpListener, Action<SocketState>> incoming = (Tuple<TcpListener, Action<SocketState>>)ar.AsyncState!;
 
+        // unpack the tuple
         TcpListener server = incoming.Item1;
         Action<SocketState> toCall = incoming.Item2;
 
+
         try
         {
+            // "confirm" the connection
             Socket socket = server.EndAcceptSocket(ar);
 
+            // create a socket state for the new connection
             SocketState state = new SocketState(toCall, socket);
+
+            // successful connection, invoke the delegate
             state.OnNetworkAction(state);
         }
         catch(Exception)
         {
+            // error, create blank socket 
             SocketState error = new SocketState(toCall, "Server couldn't accept new client.");
             return;
         }
+
 
         server.BeginAcceptSocket(AcceptNewClient, new Tuple<TcpListener, Action<SocketState>>(server, toCall));
     }
@@ -77,6 +91,7 @@ public static class Networking
     /// </summary>
     public static void StopServer(TcpListener listener)
     {
+        // stop the listener, stops the server
         listener.Stop();
     }
 
@@ -140,7 +155,6 @@ public static class Networking
             }
             catch
             {
-                // TODO: Indicate an error to the user, as specified in the documentation
                 
                 SocketState ErrorSocketState = new SocketState(toCall, "Invalid host name");
                 ErrorSocketState.OnNetworkAction.Invoke(ErrorSocketState);
@@ -156,28 +170,22 @@ public static class Networking
         // game like ours will be 
         socket.NoDelay = true;
 
-        // TODO: Finish the remainder of the connection process as specified.
 
         SocketState ClientConnect = new SocketState(toCall, socket);
 
 
-        // Timeout in case connection doesn't happen within 3 seconds.
+        // 3 second timeout in case connection doesn't happen quickly
 
         IAsyncResult result = ClientConnect.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ClientConnect);
 
-        bool success = result.AsyncWaitHandle.WaitOne(3000, true);
+        // starts timer
+        bool success = result.AsyncWaitHandle.WaitOne(3000);
 
-        if (socket.Connected)
+        if (!success)
         {
-            socket.EndConnect(result);
-        }
-        else
-        {
-            // Triggers Callback
+            // socket timed out
             socket.Close();
         }
-
-
     }
 
     /// <summary>
@@ -195,20 +203,19 @@ public static class Networking
     /// <param name="ar">The object asynchronously passed via BeginConnect</param>
     private static void ConnectedCallback(IAsyncResult ar)
     {
-
+        // retrieve SocketState from AsyncState
         SocketState temp = (SocketState)ar.AsyncState!;
         
         try
         {
+            // try to finalize connection
             temp.TheSocket.EndConnect(ar);
 
         } catch (Exception ex)
         {
-            
+            // therer was an error, update socketState accordingly
             temp.ErrorOccurred = true;
             temp.ErrorMessage = ex.Message;
-            //SocketState ErrorSocketState = new SocketState(temp.OnNetworkAction, temp.ErrorMessage);
-            //temp.OnNetworkAction.Invoke(temp);
 
         }
         // Calls delegate once connection has been established.
@@ -274,11 +281,13 @@ public static class Networking
         {
             int numBytes = state.TheSocket.EndReceive(ar);
 
+            // clean close socket
             if (numBytes == 0) {
                 state.ErrorOccurred = true;
                 state.ErrorMessage = "Clean remote socket shutdown";
             }
 
+            // multithread safe appending
             lock (state)
             {
                 state.data.Append(Encoding.UTF8.GetString(state.buffer, 0, numBytes));
@@ -286,10 +295,12 @@ public static class Networking
         }
         catch (Exception e) 
         {
+            // catch erros, set SocketState flags accordingly
             state.ErrorOccurred = true;
             state.ErrorMessage = e.Message;        
         }
 
+        // Process finished, call the delegate regardless of outcome
         state.OnNetworkAction(state);
     }
 
@@ -339,6 +350,7 @@ public static class Networking
 
         try
         {
+            // finish sending operation
             socket.EndSend(ar);
         }
         catch
@@ -401,6 +413,7 @@ public static class Networking
         catch
         {            
         }
+        // close socket to follow send and CLOSE spec
         socket.Close();
     }
 }
