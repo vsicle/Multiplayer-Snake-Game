@@ -163,6 +163,20 @@ public static class Networking
 
         // Timeout in case connection doesn't happen within 3 seconds.
 
+        // 3 second timeout in case connection doesn't happen quickly
+
+        IAsyncResult result = ClientConnect.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ClientConnect);
+
+        // starts timer
+        bool success = result.AsyncWaitHandle.WaitOne(3000);
+
+        if (!success)
+        {
+            // socket timed out
+            socket.Close();
+        }
+
+        /*
         IAsyncResult result = ClientConnect.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ClientConnect);
 
         bool success = result.AsyncWaitHandle.WaitOne(3000, true);
@@ -176,6 +190,7 @@ public static class Networking
             // Triggers Callback
             socket.Close();
         }
+        */
 
 
     }
