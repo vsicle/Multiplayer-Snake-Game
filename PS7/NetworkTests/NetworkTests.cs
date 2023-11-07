@@ -216,6 +216,28 @@ public class NetworkTests
         Assert.AreEqual("a", testRemoteSocketState.GetData());
     }
 
+    [DataRow(true)]
+    [DataRow(false)]
+    [DataTestMethod]
+    public void TestSendLargeMessage(bool clientSide)
+    {
+        SetupTestConnections(clientSide, out testListener, out testLocalSocketState, out testRemoteSocketState);
+
+        // Set the action to do nothing
+        testLocalSocketState.OnNetworkAction = x => { };
+        testRemoteSocketState.OnNetworkAction = x => { };
+
+        Networking.Send(testLocalSocketState.TheSocket, "a");
+
+        Networking.GetData(testRemoteSocketState);
+
+        // Note that waiting for data like this is *NOT* how the networking library is 
+        // intended to be used. This is only for testing purposes.
+        // Normally, you would provide an OnNetworkAction that handles the data.
+        NetworkTestHelper.WaitForOrTimeout(() => testRemoteSocketState.GetData().Length > 0, NetworkTestHelper.timeout);
+
+        Assert.AreEqual("a", testRemoteSocketState.GetData());
+    }
 
     [DataRow(true)]
     [DataRow(false)]
