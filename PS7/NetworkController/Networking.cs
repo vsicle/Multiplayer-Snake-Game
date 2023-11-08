@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -76,7 +75,7 @@ public static class Networking
             // successful connection, invoke the delegate
             state.OnNetworkAction(state);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             // error, create blank socket 
             SocketState error = new SocketState(toCall, e.Message);
@@ -141,12 +140,12 @@ public static class Networking
             // Didn't find any IPV4 addresses
             if (!foundIPV4)
             {
-             
+
                 SocketState ErrorSocketState = new SocketState(toCall, "IPV4 address not found");
                 ErrorSocketState.ErrorOccurred = true;
                 ErrorSocketState.OnNetworkAction.Invoke(ErrorSocketState);
-        
-                return;            
+
+                return;
             }
         }
         catch (Exception)
@@ -158,7 +157,7 @@ public static class Networking
             }
             catch
             {
-                
+
                 SocketState ErrorSocketState = new SocketState(toCall, "Invalid host name");
                 ErrorSocketState.ErrorOccurred = true;
                 ErrorSocketState.OnNetworkAction.Invoke(ErrorSocketState);
@@ -180,8 +179,6 @@ public static class Networking
 
         // 3 second timeout in case connection doesn't happen quickly
 
-        // 3 second timeout in case connection doesn't happen quickly
-
         IAsyncResult result = ClientConnect.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, ClientConnect);
 
         // starts timer
@@ -192,8 +189,6 @@ public static class Networking
             // socket timed out
             socket.Close();
         }
-
-
     }
 
     /// <summary>
@@ -213,13 +208,14 @@ public static class Networking
     {
         // retrieve SocketState from AsyncState
         SocketState temp = (SocketState)ar.AsyncState!;
-        
+
         try
         {
             // try to finalize connection
             temp.TheSocket.EndConnect(ar);
 
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             // therer was an error, update socketState accordingly
             temp.ErrorOccurred = true;
@@ -228,8 +224,6 @@ public static class Networking
         }
         // Calls delegate once connection has been established.
         temp.OnNetworkAction(temp);
-        
-        
     }
 
 
@@ -250,18 +244,17 @@ public static class Networking
     /// <param name="state">The SocketState to begin receiving</param>
     public static void GetData(SocketState state)
     {
-        
         try
         {
             state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             state.ErrorOccurred = true;
             state.ErrorMessage = e.Message;
+
             return;
         }
-        
     }
 
     /// <summary>
@@ -290,7 +283,8 @@ public static class Networking
             int numBytes = state.TheSocket.EndReceive(ar);
 
             // clean close socket
-            if (numBytes == 0) {
+            if (numBytes == 0)
+            {
                 state.ErrorOccurred = true;
                 state.ErrorMessage = "Clean remote socket shutdown";
             }
@@ -301,11 +295,11 @@ public static class Networking
                 state.data.Append(Encoding.UTF8.GetString(state.buffer, 0, numBytes));
             }
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             // catch erros, set SocketState flags accordingly
             state.ErrorOccurred = true;
-            state.ErrorMessage = e.Message;        
+            state.ErrorMessage = e.Message;
         }
 
         // Process finished, call the delegate regardless of outcome
@@ -332,7 +326,7 @@ public static class Networking
             socket.BeginSend(package, 0, package.Length, SocketFlags.None, SendCallback, socket);
 
             // if we get down to here, it means starting the send was successful
-                return true;
+            return true;
         }
         catch
         {
@@ -390,7 +384,7 @@ public static class Networking
 
             return true;
         }
-        catch(Exception)
+        catch (Exception)
         {
             socket.Close();
             return false;
@@ -412,14 +406,14 @@ public static class Networking
     /// </param>
     private static void SendAndCloseCallback(IAsyncResult ar)
     {
-        Socket socket = (Socket )ar.AsyncState!;
+        Socket socket = (Socket)ar.AsyncState!;
 
         try
         {
             socket.EndSend(ar);
         }
         catch
-        {            
+        {
         }
         // close socket to follow send and CLOSE spec
         socket.Close();
