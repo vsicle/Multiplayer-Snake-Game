@@ -27,6 +27,7 @@ public static class Networking
         Tuple<TcpListener, Action<SocketState>> storage = new Tuple<TcpListener, Action<SocketState>>(server, toCall);
 
         // start the listener
+        
         server.Start();
 
         // start accepting
@@ -75,10 +76,12 @@ public static class Networking
             // successful connection, invoke the delegate
             state.OnNetworkAction(state);
         }
-        catch(Exception)
+        catch(Exception e)
         {
             // error, create blank socket 
-            SocketState error = new SocketState(toCall, "Server couldn't accept new client.");
+            SocketState error = new SocketState(toCall, e.Message);
+            error.ErrorOccurred = true;
+            toCall(error);
             return;
         }
 
@@ -140,7 +143,7 @@ public static class Networking
             {
              
                 SocketState ErrorSocketState = new SocketState(toCall, "IPV4 address not found");
-
+                ErrorSocketState.ErrorOccurred = true;
                 ErrorSocketState.OnNetworkAction.Invoke(ErrorSocketState);
         
                 return;            
@@ -157,6 +160,7 @@ public static class Networking
             {
                 
                 SocketState ErrorSocketState = new SocketState(toCall, "Invalid host name");
+                ErrorSocketState.ErrorOccurred = true;
                 ErrorSocketState.OnNetworkAction.Invoke(ErrorSocketState);
                 return;
             }

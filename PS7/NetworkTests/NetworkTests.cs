@@ -467,6 +467,55 @@ public class NetworkTests
     /*** End Send/Receive Tests ***/
 
 
+
     //TODO: Add more of your own tests here
+
+    /*** ConnectToServer Tests ***/
+
+    [TestMethod]
+    public void TestConnectToServerBadURL()
+    {
+        // Flag variable.
+        bool isCalled = false;
+
+        void saveClientState(SocketState x)
+        {
+            isCalled = true;
+            testLocalSocketState = x;
+        }
+
+        // Try a bad URL
+        Networking.ConnectToServer(saveClientState, "www.doesnotexistfjdksla;fjda.com", 2112);
+
+        Assert.IsTrue(isCalled);
+        Assert.IsTrue(testLocalSocketState?.ErrorOccurred);
+        Assert.AreEqual("Invalid host name", testLocalSocketState?.ErrorMessage);
+
+    }
+
+    [TestMethod]
+    public void TestConnectToServerNoIPv4Address()
+    {
+        // Flag variable.
+        bool isCalled = false;
+
+        void saveClientState(SocketState x)
+        {
+            isCalled = true;
+            testLocalSocketState = x;
+        }
+
+        // Try a URL with no IPv4 associated
+        Networking.ConnectToServer(saveClientState, "192.168.1.1", 2112);
+
+        //NetworkTestHelper.WaitForOrTimeout(() => isCalled, NetworkTestHelper.timeout);
+
+        Assert.IsTrue(isCalled);
+        Assert.IsTrue(testLocalSocketState?.ErrorOccurred);
+        Assert.AreEqual("IPV4 address not found", testLocalSocketState?.ErrorMessage);
+    }
+
+
+
 
 }
