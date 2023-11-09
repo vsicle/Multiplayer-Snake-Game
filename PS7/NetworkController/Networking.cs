@@ -252,7 +252,7 @@ public static class Networking
         {
             state.ErrorOccurred = true;
             state.ErrorMessage = e.Message;
-
+            state.OnNetworkAction(state);
             return;
         }
     }
