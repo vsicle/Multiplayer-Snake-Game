@@ -157,7 +157,7 @@ public static class Networking
             }
             catch
             {
-
+                // make a dummy socket to set error
                 SocketState ErrorSocketState = new SocketState(toCall, "Invalid host name");
                 ErrorSocketState.ErrorOccurred = true;
                 ErrorSocketState.OnNetworkAction.Invoke(ErrorSocketState);
@@ -246,10 +246,12 @@ public static class Networking
     {
         try
         {
+            // start recieving
             state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
         }
         catch (Exception e)
         {
+            // error occurred, set flags
             state.ErrorOccurred = true;
             state.ErrorMessage = e.Message;
 
@@ -276,10 +278,13 @@ public static class Networking
     /// </param>
     private static void ReceiveCallback(IAsyncResult ar)
     {
+        // data incoming, finish the recieve
+
         SocketState state = (SocketState)ar.AsyncState!;
 
         try
         {
+            // finish handshake procedure
             int numBytes = state.TheSocket.EndReceive(ar);
 
             // clean close socket
@@ -318,6 +323,7 @@ public static class Networking
     /// <returns>True if the send process was started, false if an error occurs or the socket is already closed</returns>
     public static bool Send(Socket socket, string data)
     {
+        // encode the data
         byte[] package = Encoding.UTF8.GetBytes(data);
 
         try
@@ -376,10 +382,12 @@ public static class Networking
     /// <returns>True if the send process was started, false if an error occurs or the socket is already closed</returns>
     public static bool SendAndClose(Socket socket, string data)
     {
+        // encode the string
         byte[] package = Encoding.UTF8.GetBytes(data);
 
         try
         {
+            //start the send
             socket.BeginSend(package, 0, package.Length, SocketFlags.None, SendAndCloseCallback, socket);
 
             return true;
@@ -410,12 +418,13 @@ public static class Networking
 
         try
         {
+            // finish the sending
             socket.EndSend(ar);
         }
         catch
         {
         }
-        // close socket to follow send and CLOSE spec
+        // close socket to follow "send and close" spec
         socket.Close();
     }
 }
