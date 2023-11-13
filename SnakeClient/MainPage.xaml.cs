@@ -139,7 +139,7 @@ public partial class MainPage : ContentPage
         // display each new message in the text area
         foreach (string p in newMessages)
         {
-            Debug.WriteLine(p);
+            Debug.WriteLine("From server: "+p);
             /*
             Dispatcher.Dispatch(
               () => messages.Text = p + messages.Text);

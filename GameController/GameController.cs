@@ -6,52 +6,53 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 public class GameController
+{
+    // Controller events that the view can subscribe to
+    public delegate void MessageHandler(IEnumerable<string> messages);
+    public event MessageHandler? MessagesArrived;
+
+    // Could also do public event Action<string> MessageArrived;
+
+    public delegate void ConnectedHandler();
+    public event ConnectedHandler? Connected;
+
+    public delegate void ErrorHandler(string err);
+    public event ErrorHandler? Error;
+
+    private string? PlayerName;
+    private bool handshakeComplete;
+    private int playerID;
+    private int worldSize;
+
+
+    /// <summary>
+    /// State representing the connection with the server
+    /// </summary>
+    //SocketState? theServer = null;
+
+    public GameController()
     {
-        // Controller events that the view can subscribe to
-        public delegate void MessageHandler(IEnumerable<string> messages);
-        public event MessageHandler? MessagesArrived;
 
-        // Could also do public event Action<string> MessageArrived;
+    }
 
-        public delegate void ConnectedHandler();
-        public event ConnectedHandler? Connected;
+    /// <summary>
+    /// Begins the process of connecting to the server
+    /// </summary>
+    /// <param name="addr"></param>
+    public void Connect(string addr, string _PlayerName)
+    {
+        Networking.ConnectToServer(OnConnect, addr, 11000);
 
-        public delegate void ErrorHandler(string err);
-        public event ErrorHandler? Error;
+        PlayerName = _PlayerName;
+        handshakeComplete = false;
+    }
 
-        private string? PlayerName;
-
-        
-
-        
-
-        /// <summary>
-        /// State representing the connection with the server
-        /// </summary>
-        //SocketState? theServer = null;
-
-        public GameController()
-        {
-            
-        }
-
-        /// <summary>
-        /// Begins the process of connecting to the server
-        /// </summary>
-        /// <param name="addr"></param>
-        public void Connect(string addr, string _PlayerName)
-        {
-            Networking.ConnectToServer(OnConnect, addr, 11000);
-            
-            PlayerName = _PlayerName;
-        }
-
-        /// <summary>
-        /// Method to be invoked by the networking library when a connection is made
-        /// </summary>
-        /// <param name="state"></param>
-        private void OnConnect(SocketState state)
-        {
+    /// <summary>
+    /// Method to be invoked by the networking library when a connection is made
+    /// </summary>
+    /// <param name="state"></param>
+    private void OnConnect(SocketState state)
+    {
         /*
 
             theServer = state;
@@ -65,12 +66,12 @@ public class GameController
         {
             // inform the view
             Error?.Invoke("Error connecting to server");
-            
+
             return;
         }
 
         Networking.Send(state.TheSocket, PlayerName + "\n");
-        
+
         Connected?.Invoke();
         Debug.WriteLine("Connected (from controller)");
         state.OnNetworkAction = ReceiveMessage;
@@ -135,6 +136,15 @@ public class GameController
             // Then remove it from the SocketState's growable buffer
             state.RemoveData(0, p.Length);
         }
+
+        // TODO: is this right and reliable???
+        if (!handshakeComplete)
+        {
+            playerID = int.Parse(parts[0]);
+            worldSize = int.Parse(parts[1]);
+            handshakeComplete = true;
+        }
+
 
         // inform the view
         MessagesArrived?.Invoke(newMessages);
