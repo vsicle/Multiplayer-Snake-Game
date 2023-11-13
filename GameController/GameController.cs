@@ -145,8 +145,10 @@ public class GameController
             handshakeComplete = true;
         }
 
+        // TODO: update the model
 
-        // inform the view
+
+        // inform the view of update so it can redraw
         MessagesArrived?.Invoke(newMessages);
         // equivalent syntax: MessageArrived(newMessages);
 
