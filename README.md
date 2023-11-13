@@ -24,3 +24,5 @@ switches. Started a model class. Got all messages from public server to print ou
 T.A. said to make everything in one toCall method with boolean flags and
 that we would talk about how to swap out toCall methods tomorrow in lecture.
 
+Added code to capture player ID and world size from server (first two ints recieved)
+
