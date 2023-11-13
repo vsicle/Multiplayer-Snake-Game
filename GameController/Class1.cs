@@ -75,7 +75,7 @@ public class GameController
         Networking.Send(state.TheSocket, PlayerName + "\n");
         // Do event when Server sends player ID and size of world
         Connected?.Invoke();
-        Debug.WriteLine("Connected");
+        Debug.WriteLine("Connected (from controller)");
 
         
         }
@@ -93,7 +93,7 @@ public class GameController
             Error?.Invoke("Lost connection to server");
             return;
         }
-        ProcessMessages(state);
+        //ProcessMessages(state);
 
         // Continue the event loop
         // state.OnNetworkAction has not been changed, 

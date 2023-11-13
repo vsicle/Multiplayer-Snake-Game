@@ -27,7 +27,7 @@ public partial class MainPage : ContentPage
         // Just print a message saying we connected
         Dispatcher.Dispatch(() => messages.Text = "Connected\n" + messages.Text);
         */
-        Debug.WriteLine("Connected");
+        Debug.WriteLine("Connected (from VIEW)");
         
     }
 
