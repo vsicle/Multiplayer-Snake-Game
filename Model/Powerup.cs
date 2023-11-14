@@ -21,13 +21,13 @@ namespace Model
     public class Powerup
     {
         [JsonInclude]
-        public int power { get; set; }
+        public int power {get;}
 
         [JsonInclude]
-        public Vector2D loc {  get; set; }
+        public Vector2D loc {get;}
 
         [JsonInclude]
-        public bool died {  get; set; }
+        public bool died {get;}
 
         [JsonConstructor]
         public Powerup(int power, Vector2D loc, bool died)
