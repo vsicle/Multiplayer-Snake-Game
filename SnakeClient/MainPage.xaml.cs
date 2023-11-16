@@ -16,8 +16,8 @@ public partial class MainPage : ContentPage
         GC.InitialMessagesArrived += InitialWorldUpdate;
         GC.MessagesArrived += WorldUpdate;
         GC.Connected += HandleConnected;
-        
-        
+
+
     }
 
 
@@ -27,7 +27,7 @@ public partial class MainPage : ContentPage
     private void HandleConnected()
     {
         Debug.WriteLine("Connected (from VIEW)");
-        
+
     }
 
     void OnTapped(object sender, EventArgs args)
@@ -128,32 +128,42 @@ public partial class MainPage : ContentPage
             keyboardHack.Focus();
     }
 
-
+    /// <summary>
+    /// This is the main drawing method that gets called whenever there is something new to be drawn
+    /// DRAWING HAPPENS HERE
+    /// </summary>
+    /// <param name="newMessages"></param>
     private void WorldUpdate(IEnumerable<string> newMessages)
     {
+
+        // TODO: Make the drawing happen here using the world class as the source of info
+        // of what to draw
+
+
+
         foreach (string p in newMessages)
         {
             Debug.WriteLine("From server: " + p);
-            
+
         }
-
-
     }
 
-        /// <summary>
-        /// Handler for the controller's MessagesArrived event
-        /// </summary>
-        /// <param name="newMessages"></param>
-        private void InitialWorldUpdate(IEnumerable<string> newMessages, World world)
+    /// <summary>
+    /// Handler for the controller's InitialMessagesArrived event
+    /// NO DRAWING HAPPENS HERE
+    /// This method is executed to finish game setup/handshake
+    /// </summary>
+    /// <param name="newMessages"></param>
+    private void InitialWorldUpdate(IEnumerable<string> newMessages, World world)
     {
 
         // save the world
         this.world = world;
+
         // display each new message in the text area
         foreach (string p in newMessages)
         {
-            Debug.WriteLine("From server: "+p);
-
+            Debug.WriteLine("From server: " + p);
         }
     }
 }
