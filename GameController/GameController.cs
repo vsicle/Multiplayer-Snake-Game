@@ -150,6 +150,7 @@ public class GameController
         // TODO: update the model
         for (int i = 2; i < parts.Length; i++) 
         {
+            if (parts[i].Length != 0)
             world.UpdateWorld(parts[i]);
         }
             

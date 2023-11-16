@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Model
-    
+
 {
     /// <summary>
     /// This class contains all the objects the Server sends.
@@ -38,44 +38,52 @@ namespace Model
 
             //TODO: fix JSON issue
 
-            var JsonName = JDoc.RootElement.EnumerateObject();
-            string objectKind = JsonName.ElementAt(0).Name;
-
-            // TA said to use rootelement.TryGetValue
-
-
-            switch(objectKind)
+            if (JDoc.RootElement.TryGetProperty("snake", out _))
             {
-                case "wall":
-                    Wall? tempWall = JsonSerializer.Deserialize<Wall>(objectKind);
-                    if(tempWall != null)
+                Snake? tempSnake = JsonSerializer.Deserialize<Snake>(JsonString);
+                if (tempSnake != null)
+                {
+                    if (snakes.ContainsKey(tempSnake.snake))
                     {
-                        walls.Add(tempWall.wall, tempWall);
+                        snakes[tempSnake.snake] = tempSnake;
                     }
-                    break;
-                case "snake":
-                    Snake? tempSnake = JsonSerializer.Deserialize<Snake>(objectKind);
-                    if (tempSnake != null)
+                    else
                     {
                         snakes.Add(tempSnake.snake, tempSnake);
                     }
-                    break;
-                case "power":
-                    Powerup? tempPower = JsonSerializer.Deserialize<Powerup>(objectKind);
-                    if (tempPower != null)
+                }
+            }
+            else if (JDoc.RootElement.TryGetProperty("wall", out _))
+            {
+                Wall? tempWall = JsonSerializer.Deserialize<Wall>(JsonString);
+                if (tempWall != null)
+                {
+                    if (walls.ContainsKey(tempWall.wall))
+                    {
+                        walls[tempWall.wall] = tempWall;
+                    }
+                    else
+                    {
+                        walls.Add(tempWall.wall, tempWall);
+                    }
+                }
+            }
+            else if (JDoc.RootElement.TryGetProperty("power", out _))
+            {
+                Powerup? tempPower = JsonSerializer.Deserialize<Powerup>(JsonString);
+                if (tempPower != null)
+                {
+                    if (powerups.ContainsKey(tempPower.power))
+                    {
+                        powerups[tempPower.power] = tempPower;
+                    }
+                    else
                     {
                         powerups.Add(tempPower.power, tempPower);
                     }
-                    break;
-                default:
-                    Debug.WriteLine("Failed to match/find type of JSON object");
-                    break;
+                }
             }
-            
-
-        
-
-
         }
+
     }
 }
