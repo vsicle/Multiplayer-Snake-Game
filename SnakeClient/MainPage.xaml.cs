@@ -1,16 +1,19 @@
 ﻿namespace SnakeGame;
 using Controller;
+using Model;
 using System.Diagnostics;
 
 public partial class MainPage : ContentPage
 {
     GameController GC = new GameController();
+    World world;
 
     public MainPage()
     {
 
         InitializeComponent();
         graphicsView.Invalidate();
+        GC.InitialMessagesArrived += InitialWorldUpdate;
         GC.MessagesArrived += WorldUpdate;
         GC.Connected += HandleConnected;
         
@@ -23,10 +26,6 @@ public partial class MainPage : ContentPage
     /// </summary>
     private void HandleConnected()
     {
-        /*
-        // Just print a message saying we connected
-        Dispatcher.Dispatch(() => messages.Text = "Connected\n" + messages.Text);
-        */
         Debug.WriteLine("Connected (from VIEW)");
         
     }
@@ -130,20 +129,31 @@ public partial class MainPage : ContentPage
     }
 
 
-    /// <summary>
-    /// Handler for the controller's MessagesArrived event
-    /// </summary>
-    /// <param name="newMessages"></param>
     private void WorldUpdate(IEnumerable<string> newMessages)
     {
+        foreach (string p in newMessages)
+        {
+            Debug.WriteLine("From server: " + p);
+            
+        }
+
+
+    }
+
+        /// <summary>
+        /// Handler for the controller's MessagesArrived event
+        /// </summary>
+        /// <param name="newMessages"></param>
+        private void InitialWorldUpdate(IEnumerable<string> newMessages, World world)
+    {
+
+        // save the world
+        this.world = world;
         // display each new message in the text area
         foreach (string p in newMessages)
         {
             Debug.WriteLine("From server: "+p);
-            /*
-            Dispatcher.Dispatch(
-              () => messages.Text = p + messages.Text);
-            */
+
         }
     }
 }

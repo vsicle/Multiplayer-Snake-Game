@@ -14,6 +14,17 @@ namespace Model
         private Dictionary<int, Powerup> powerups;
         private Dictionary<int, Wall> walls;
         private int size;
+
+        /// <summary>
+        /// create a blank world
+        /// </summary>
+        public World()
+        {
+            snakes = new Dictionary<int, Snake>();
+            powerups = new Dictionary<int, Powerup>();
+            walls = new Dictionary<int, Wall>();
+        }
+
         /// <summary>
         /// create a blank world
         /// </summary>
@@ -36,7 +47,6 @@ namespace Model
             // likely using the first word in the JSON
             JsonDocument JDoc = JsonDocument.Parse(JsonString);
 
-            //TODO: fix JSON issue
 
             if (JDoc.RootElement.TryGetProperty("snake", out _))
             {

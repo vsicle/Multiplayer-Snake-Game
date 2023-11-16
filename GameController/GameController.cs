@@ -4,10 +4,14 @@ using Model;
 
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.IO;
 
 public class GameController
 {
     // Controller events that the view can subscribe to
+    public delegate void InitialMessageHandler(IEnumerable<string> messages, World world);
+    public event InitialMessageHandler? InitialMessagesArrived;
+
     public delegate void MessageHandler(IEnumerable<string> messages);
     public event MessageHandler? MessagesArrived;
 
@@ -31,7 +35,8 @@ public class GameController
 
     public GameController()
     {
-
+        // not used, will be replaced once connection is established
+        world = new World();
     }
 
     /// <summary>
@@ -94,8 +99,17 @@ public class GameController
         }
 
         // Do event when Server sends player ID and size of world
+        if (!handshakeComplete)
+        {
+            ProcessInitialMessages(state);
+        }
+        else
+        {
+            ProcessMessages(state);
+        }
 
-        ProcessMessages(state);
+
+
 
         // Continue the event loop
         // state.OnNetworkAction has not been changed, 
@@ -104,12 +118,29 @@ public class GameController
         Networking.GetData(state);
     }
 
+    private void ProcessMessages(SocketState state)
+    {
+        // Assemble incoming data from server
+        List<string> incomingData = BuildIncomingData(state);
+
+        // update model using the data
+        for (int i = 0; i < incomingData.Count; i++)
+        {
+            if (incomingData[i].Length != 0)
+                world.UpdateWorld(incomingData[i]);
+        }
+
+        // Tell View that the world has changed
+        MessagesArrived?.Invoke(incomingData);
+    }
+
     /// <summary>
+    /// Method to assemble the incoming data into a single, ready to use list
     /// Process any buffered messages separated by '\n'
-    /// Then inform the view
     /// </summary>
     /// <param name="state"></param>
-    private void ProcessMessages(SocketState state)
+    /// <returns>List<string> representing the incoming data in a string list</string></returns>
+    private List<string> BuildIncomingData(SocketState state)
     {
         string totalData = state.GetData();
         string[] parts = Regex.Split(totalData, @"(?<=[\n])");
@@ -135,29 +166,33 @@ public class GameController
             // Then remove it from the SocketState's growable buffer
             state.RemoveData(0, p.Length);
         }
+        return newMessages;
+    }
 
-        // check for length of parts just in case
-        if (!handshakeComplete)
-        {
-            playerID = int.Parse(parts[0]);
+    /// <summary>
+    /// processes the handshake part of the incoming messages from the server
+    /// Then inform the view
+    /// </summary>
+    /// <param name="state"></param>
+    private void ProcessInitialMessages(SocketState state)
+    {
+        // build the incoming messages
+        List<string> parts = BuildIncomingData(state);
 
-            // give the world the worldSize (in pixels)
-            world = new World(int.Parse(parts[1]));
+        // capture player ID
+        playerID = int.Parse(parts[0]);
 
-            handshakeComplete = true;
-        }
+        // give the world the worldSize (in pixels)
+        // create the actual world class we will use
+        world = new World(int.Parse(parts[1]));
 
-        // TODO: update the model
-        for (int i = 2; i < parts.Length; i++) 
-        {
-            if (parts[i].Length != 0)
-            world.UpdateWorld(parts[i]);
-        }
-            
-    
-        // inform the view of update so it can redraw
-        MessagesArrived?.Invoke(newMessages);
-        // equivalent syntax: MessageArrived(newMessages);
+        // set flag for completed handshake
+        handshakeComplete = true;
+
+
+        // inform the view of the info about the handshake and give it the world so it has access
+        InitialMessagesArrived?.Invoke(parts, world);
+
 
     }
 }
