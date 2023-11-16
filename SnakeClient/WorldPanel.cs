@@ -13,14 +13,17 @@ using Microsoft.Maui;
 using System.Net;
 using Font = Microsoft.Maui.Graphics.Font;
 using SizeF = Microsoft.Maui.Graphics.SizeF;
-
-
+using Model;
 
 namespace SnakeGame;
-public class WorldPanel : IDrawable
+public class WorldPanel : ScrollView, IDrawable
 {
     private IImage wall;
     private IImage background;
+
+    private GraphicsView graphicsView = new();
+
+    private World theWorld;
 
     private bool initializedForDrawing = false;
 
