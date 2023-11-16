@@ -9,12 +9,7 @@ using SnakeGame;
 
 namespace Model
 {
-    /*
-    {"snake":0,"name":"Travis","body":[{"X":‐689.8494277000427,"Y":462.33808994293213},{
-    "X":‐809.849427700042
-    7,"Y":462.33808994293213}],"dir":{ "X":‐1.0,"Y":0.0},"score":0,"died":false,"alive":true,"dc":false,"join":
-    false}
-    */
+   
         
     public class Snake
     {
