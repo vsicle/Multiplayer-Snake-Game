@@ -22,8 +22,7 @@ public class GameController
     private string? PlayerName;
     private bool handshakeComplete;
     private int playerID;
-    private int worldSize;
-
+    private World world;
 
     /// <summary>
     /// State representing the connection with the server
@@ -137,17 +136,24 @@ public class GameController
             state.RemoveData(0, p.Length);
         }
 
-        // TODO: is this right and reliable???
+        // check for length of parts just in case
         if (!handshakeComplete)
         {
             playerID = int.Parse(parts[0]);
-            worldSize = int.Parse(parts[1]);
+
+            // give the world the worldSize (in pixels)
+            world = new World(int.Parse(parts[1]));
+
             handshakeComplete = true;
         }
 
         // TODO: update the model
-
-
+        for (int i = 2; i < parts.Length; i++) 
+        {
+            world.UpdateWorld(parts[i]);
+        }
+            
+    
         // inform the view of update so it can redraw
         MessagesArrived?.Invoke(newMessages);
         // equivalent syntax: MessageArrived(newMessages);
