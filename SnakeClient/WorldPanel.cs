@@ -14,6 +14,7 @@ using System.Net;
 using Font = Microsoft.Maui.Graphics.Font;
 using SizeF = Microsoft.Maui.Graphics.SizeF;
 using Model;
+using Windows.ApplicationModel.VoiceCommands;
 
 namespace SnakeGame;
 public class WorldPanel : ScrollView, IDrawable
@@ -23,8 +24,12 @@ public class WorldPanel : ScrollView, IDrawable
 
     private World theWorld;
 
+    public delegate void ObjectDrawer(object obj, ICanvas canvas);
+
     float playerX;
     float playerY;
+
+    private int playerID;
 
     int viewSize = 900;
 
@@ -52,20 +57,21 @@ public class WorldPanel : ScrollView, IDrawable
     public void SetWorld(World w, int playerID)
     {
         theWorld = w;
-        Snake tempSnake;
-        w.snakes.TryGetValue(playerID, out tempSnake);
-        playerX = (float)tempSnake.body[0].GetX();
-        playerY = (float)tempSnake.body[0].GetY();
+        this.playerID = playerID;
+        //Snake tempSnake;
+        //w.snakes.TryGetValue(playerID, out tempSnake);
+        //playerX = (float)tempSnake.body[0].GetX();
+        //playerY = (float)tempSnake.body[0].GetY();
     }
 
     private void InitializeDrawing()
     {
-        wall = loadImage( "wallsprite.png" );
-        background = loadImage( "background.png" );
+        wall = loadImage("wallsprite.png");
+        background = loadImage("background.png");
         initializedForDrawing = true;
     }
 
-    /*
+
 
     /// <summary>
     /// This method performs a translation and rotation to draw an object.
@@ -89,23 +95,45 @@ public class WorldPanel : ScrollView, IDrawable
         canvas.RestoreState();
     }
 
-    */
+    private void SnakeDrawer(object obj, ICanvas canvas)
+    {
+        Snake s = (Snake)obj;
+        canvas.DrawCircle((float)s.body[0].GetX(), (float)s.body[0].GetY(), 20);
+    }
 
     public void Draw(ICanvas canvas, RectF dirtyRect)
     {
-        if ( !initializedForDrawing )
+        if (!initializedForDrawing)
             InitializeDrawing();
-
-        
 
         // undo previous transformations from last frame
         canvas.ResetState();
 
-        canvas.Translate(-playerX + (viewSize / 2), -playerY + (viewSize / 2));
+        
+
+        
+        if (theWorld != null && theWorld.snakes != null)
+        {
+            Snake tempSnake;
+            theWorld.snakes.TryGetValue(playerID, out tempSnake);
+
+            if (tempSnake.body[0] != null)
+            {
+                playerX = (float)tempSnake.body[0].GetX();
+                playerY = (float)tempSnake.body[0].GetY();
+
+                canvas.Translate(-playerX + (viewSize / 2), -playerY + (viewSize / 2));
+
+                canvas.DrawImage(background, 0, 0, 2000/2, 2000/2);
+
+                DrawObjectWithTransform(canvas, tempSnake, 0, 0, 0, SnakeDrawer);
+            }
+        }
+
 
         // example code for how to draw
         // (the image is not visible in the starter code)
-        canvas.DrawImage(wall, 0, 0, wall.Width, wall.Height);
+        //canvas.DrawImage(wall, 0, 0, wall.Width, wall.Height);
         /*
         // draw the objects in the world
         foreach (var p in theWorld.walls.Values)

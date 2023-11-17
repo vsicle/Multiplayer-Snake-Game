@@ -142,11 +142,11 @@ public partial class MainPage : ContentPage
 
 
 
-        foreach (string p in newMessages)
-        {
-            Debug.WriteLine("From server: " + p);
+        //foreach (string p in newMessages)
+        //{
+        //    Debug.WriteLine("From server: " + p);
 
-        }
+        //}
 
         graphicsView.Invalidate();
 

@@ -176,6 +176,10 @@ public class GameController
     /// <param name="state"></param>
     private void ProcessInitialMessages(SocketState state)
     {
+
+        // TODO: Deactivate connect button when connection is established
+
+
         // build the incoming messages
         List<string> parts = BuildIncomingData(state);
 

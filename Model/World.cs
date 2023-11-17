@@ -13,7 +13,7 @@ namespace Model
         public Dictionary<int, Snake> snakes;
         private Dictionary<int, Powerup> powerups;
         public Dictionary<int, Wall> walls;
-        private int size { get; }
+        public int size { get; }
 
         /// <summary>
         /// create a blank world
