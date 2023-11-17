@@ -10,9 +10,9 @@ namespace Model
     /// </summary>
     public class World
     {
-        private Dictionary<int, Snake> snakes;
+        public Dictionary<int, Snake> snakes;
         private Dictionary<int, Powerup> powerups;
-        private Dictionary<int, Wall> walls;
+        public Dictionary<int, Wall> walls;
         private int size { get; }
 
         /// <summary>

@@ -13,6 +13,7 @@ public partial class MainPage : ContentPage
 
         InitializeComponent();
         graphicsView.Invalidate();
+        
         GC.InitialMessagesArrived += InitialWorldUpdate;
         GC.MessagesArrived += WorldUpdate;
         GC.Connected += HandleConnected;
@@ -146,6 +147,9 @@ public partial class MainPage : ContentPage
             Debug.WriteLine("From server: " + p);
 
         }
+
+        graphicsView.Invalidate();
+
     }
 
     /// <summary>
@@ -165,5 +169,10 @@ public partial class MainPage : ContentPage
         {
             Debug.WriteLine("From server: " + p);
         }
+
+        worldPanel.SetWorld(world, GC.playerID);
+
+        
+
     }
 }

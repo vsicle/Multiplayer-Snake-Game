@@ -25,7 +25,7 @@ public class GameController
 
     private string? PlayerName;
     private bool handshakeComplete;
-    private int playerID;
+    public int playerID;
     private World world;
 
     /// <summary>
