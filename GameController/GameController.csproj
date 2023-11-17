@@ -16,7 +16,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Model\Model.csproj" />
-    <ProjectReference Include="..\NetworkController\NetworkController.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="NetworkController">
+      <HintPath>..\NetworkController\Libraries\NetworkController.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
