@@ -170,6 +170,8 @@ public partial class MainPage : ContentPage
             Debug.WriteLine("From server: " + p);
         }
 
+        Debug.WriteLine(world.walls.Count);
+
         worldPanel.SetWorld(world, GC.playerID);
 
         

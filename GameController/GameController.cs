@@ -130,6 +130,7 @@ public class GameController
                 world.UpdateWorld(incomingData[i]);
         }
 
+        Debug.WriteLine(world.walls.Count);
         // Tell View that the world has changed
         MessagesArrived?.Invoke(incomingData);
     }
@@ -190,10 +191,14 @@ public class GameController
         // create the actual world class we will use
         world = new World(int.Parse(parts[1]));
 
+        for (int i = 2; i < parts.Count; i++)
+        {
+            world.UpdateWorld(parts[i]);
+        }
         // set flag for completed handshake
         handshakeComplete = true;
 
-
+        
         // inform the view of the info about the handshake and give it the world so it has access
         InitialMessagesArrived?.Invoke(parts, world);
 

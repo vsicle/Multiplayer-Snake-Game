@@ -19,7 +19,7 @@ using Windows.ApplicationModel.VoiceCommands;
 namespace SnakeGame;
 public class WorldPanel : ScrollView, IDrawable
 {
-    private IImage wall;
+    private IImage wallImage;
     private IImage background;
 
     private World theWorld;
@@ -66,7 +66,7 @@ public class WorldPanel : ScrollView, IDrawable
 
     private void InitializeDrawing()
     {
-        wall = loadImage("wallsprite.png");
+        wallImage = loadImage("wallsprite.png");
         background = loadImage("background.png");
         initializedForDrawing = true;
     }
@@ -95,6 +95,44 @@ public class WorldPanel : ScrollView, IDrawable
         canvas.RestoreState();
     }
 
+    private void WallDrawer(object obj, ICanvas canvas)
+    {
+        Wall w = (Wall)obj;
+
+        // save x-coordinates of each point
+        double p1x = w.p1.GetX();
+        double p2x = w.p2.GetX();
+
+        // save y-coordinates of each point
+        double p1y = w.p1.GetY();
+        double p2y = w.p2.GetY();
+
+        double numWalls = 0;
+
+        if (p1x != p2x)
+        {
+            numWalls = Math.Abs((p2x - p1x)/50);
+            for(int i = 0; i < numWalls; i++)
+            {
+                double adjustingVariable = ((p2x- p1x)/50)*i;
+                //double drawingEndpoint = p2x - p1x;
+                //double drawingStartPoint = p1x;
+                canvas.DrawImage(wallImage, (float)(p1x+(adjustingVariable*50)), (float)p1y, wallImage.Height, wallImage.Width);
+            }
+        }
+        else
+        {
+            numWalls = Math.Abs((p2y - p1y));
+            for (int i = 0; i < numWalls; i += 25)
+            {
+                double adjustingVariable = ((p2y - p1y) / 50) * i;
+                //double drawingEndpoint = p2x - p1x;
+                //double drawingStartPoint = p1x;
+                canvas.DrawImage(wallImage, (float)p1x, (float)(p1y+(adjustingVariable*50)), wallImage.Height, wallImage.Width);
+            }
+        }
+    }
+
     private void SnakeDrawer(object obj, ICanvas canvas)
     {
         Snake s = (Snake)obj;
@@ -117,23 +155,38 @@ public class WorldPanel : ScrollView, IDrawable
             Snake tempSnake;
             theWorld.snakes.TryGetValue(playerID, out tempSnake);
 
-            if (tempSnake.body[0] != null)
+            if (tempSnake != null && tempSnake.body != null &  tempSnake.body[0] != null)
             {
                 playerX = (float)tempSnake.body[0].GetX();
                 playerY = (float)tempSnake.body[0].GetY();
 
+                
+
                 canvas.Translate(-playerX + (viewSize / 2), -playerY + (viewSize / 2));
 
-                canvas.DrawImage(background, 0, 0, 2000/2, 2000/2);
-
+                canvas.DrawImage(background, -theWorld.size/2, -theWorld.size/2, theWorld.size, theWorld.size);
+                //DrawObjectWithTransform(canvas, wallImage, 100, wallImage.Value.p1.GetY(), 0, WallDrawer);
+                // draw snake head
                 DrawObjectWithTransform(canvas, tempSnake, 0, 0, 0, SnakeDrawer);
+
+
+
+                //draw walls
+                lock (theWorld.walls)
+                {
+                    foreach (var w in theWorld.walls)
+                    {
+                        Wall wall = w.Value;
+                        DrawObjectWithTransform(canvas, wall, wall.p1.GetX(), wall.p1.GetY(), 0, WallDrawer);
+                    }
+                }
             }
         }
 
 
         // example code for how to draw
         // (the image is not visible in the starter code)
-        //canvas.DrawImage(wall, 0, 0, wall.Width, wall.Height);
+        //canvas.DrawImage(wallImage, 0, 0, wallImage.Width, wallImage.Height);
         /*
         // draw the objects in the world
         foreach (var p in theWorld.walls.Values)
