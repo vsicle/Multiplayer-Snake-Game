@@ -27,6 +27,7 @@ public class GameController
     private bool handshakeComplete;
     public int playerID;
     private World world;
+    private string? movementRequest;
 
     private SocketState? sendSocket;
 
@@ -87,32 +88,24 @@ public class GameController
     // IMPORTANT THIS SHOULD FIX MOVEMENT CONTROLS
     // TODO: send movement control once we've recieved all data, then handle movement controls
 
-    public void MoveUp()
+    public void MoveRequest(string request)
     {
-        if (sendSocket != null)
+        switch (request)
         {
-            Debug.WriteLine("{\"moving\":\"up\"}");
-
-            Networking.Send(sendSocket.TheSocket, "{\"moving\":\"up\"}");
+            case "w":
+                movementRequest = "{\"moving\":\"up\"}";
+                break;
+            case "s":
+                movementRequest = "{\"moving\":\"down\"}";
+                break;
+            case "a":
+                movementRequest = "{\"moving\":\"left\"}";
+                break;
+            case "d":
+                movementRequest = "{\"moving\":\"right\"}";
+                break;
         }
-    }
-
-    public void MoveDown()
-    {
-        if (sendSocket != null)
-            Networking.Send(sendSocket.TheSocket, "{\"moving\":\"down\"}");
-    }
-
-    public void MoveRight()
-    {
-        if (sendSocket != null)
-            Networking.Send(sendSocket.TheSocket, "{\"moving\":\"right\"}");
-    }
-
-    public void MoveLeft()
-    {
-        if (sendSocket != null)
-            Networking.Send(sendSocket.TheSocket, "{\"moving\":\"left\"}");
+        
     }
 
     /// <summary>
@@ -128,6 +121,17 @@ public class GameController
             Error?.Invoke("Lost connection to server");
             // P
             return;
+        }
+
+        // TODO: make this work, maybe move it somehwere
+        // deal with movement request
+        if (movementRequest != null)
+        {
+            // send the request
+            Debug.WriteLine("Sending movement request: " + movementRequest);
+            Networking.Send(state.TheSocket, movementRequest);
+            // set it to null to signify request has been processed
+            movementRequest = null;
         }
 
         // Do event when Server sends player ID and size of world
@@ -161,6 +165,9 @@ public class GameController
             if (incomingData[i].Length != 0)
                 world.UpdateWorld(incomingData[i]);
         }
+
+        
+
 
         // Tell View that the world has changed
         MessagesArrived?.Invoke(incomingData);
@@ -198,6 +205,9 @@ public class GameController
             // Then remove it from the SocketState's growable buffer
             state.RemoveData(0, p.Length);
         }
+
+
+
         return newMessages;
     }
 

@@ -40,21 +40,9 @@ public partial class MainPage : ContentPage
     {
         Entry entry = (Entry)sender;
         String text = entry.Text.ToLower();
-        if (text == "w")
+        if(text.Equals("w") || text.Equals("a") || text.Equals("s") || text.Equals("d"))
         {
-            GC.MoveUp();
-        }
-        else if (text == "a")
-        {
-            GC.MoveLeft();
-        }
-        else if (text == "s")
-        {
-            GC.MoveDown();
-        }
-        else if (text == "d")
-        {
-            GC.MoveRight();
+            GC.MoveRequest(text);
         }
         entry.Text = "";
     }
