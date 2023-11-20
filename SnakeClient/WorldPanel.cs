@@ -179,7 +179,7 @@ public class WorldPanel : ScrollView, IDrawable
                             double adjustmentFactor = (p2x - p1x)/25.0;
                             for (int i = 0; i < numWalls; i++)
                             {
-                                DrawObjectWithTransform(canvas, wall, p1x+(adjustmentFactor*i), p1y, 0, WallDrawer);
+                                DrawObjectWithTransform(canvas, wall, p1x+(50*i), p1y, 0, WallDrawer);
                             }
                         }
                         else
@@ -188,7 +188,7 @@ public class WorldPanel : ScrollView, IDrawable
                             double adjustmentFactor = (p2y - p1y) / 50.0;
                             for (int i = 0; i < numWalls; i++)
                             {
-                                DrawObjectWithTransform(canvas, wall, p1x, p1y+(adjustmentFactor*i), 0, WallDrawer);
+                                DrawObjectWithTransform(canvas, wall, p1x, p1y+(50*i), 0, WallDrawer);
                             }
                         }
                     }
