@@ -84,12 +84,17 @@ public class GameController
         Networking.GetData(state);
 
     }
-
+    // IMPORTANT THIS SHOULD FIX MOVEMENT CONTROLS
+    // TODO: send movement control once we've recieved all data, then handle movement controls
 
     public void MoveUp()
     {
-        if(sendSocket != null) 
+        if (sendSocket != null)
+        {
+            Debug.WriteLine("{\"moving\":\"up\"}");
+
             Networking.Send(sendSocket.TheSocket, "{\"moving\":\"up\"}");
+        }
     }
 
     public void MoveDown()
@@ -157,7 +162,6 @@ public class GameController
                 world.UpdateWorld(incomingData[i]);
         }
 
-        Debug.WriteLine(world.walls.Count);
         // Tell View that the world has changed
         MessagesArrived?.Invoke(incomingData);
     }

@@ -11,7 +11,7 @@ namespace Model
     public class World
     {
         public Dictionary<int, Snake> snakes;
-        private Dictionary<int, Powerup> powerups;
+        public Dictionary<int, Powerup> powerups;
         public Dictionary<int, Wall> walls;
         public int size { get; }
 
