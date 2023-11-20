@@ -42,19 +42,19 @@ public partial class MainPage : ContentPage
         String text = entry.Text.ToLower();
         if (text == "w")
         {
-            // Move up
+            GC.MoveUp();
         }
         else if (text == "a")
         {
-            // Move left
+            GC.MoveLeft();
         }
         else if (text == "s")
         {
-            // Move down
+            GC.MoveDown();
         }
         else if (text == "d")
         {
-            // Move right
+            GC.MoveRight();
         }
         entry.Text = "";
     }

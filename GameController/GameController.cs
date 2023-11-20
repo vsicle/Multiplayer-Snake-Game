@@ -28,6 +28,8 @@ public class GameController
     public int playerID;
     private World world;
 
+    private SocketState? sendSocket;
+
     /// <summary>
     /// State representing the connection with the server
     /// </summary>
@@ -81,6 +83,31 @@ public class GameController
         state.OnNetworkAction = ReceiveMessage;
         Networking.GetData(state);
 
+    }
+
+
+    public void MoveUp()
+    {
+        if(sendSocket != null) 
+            Networking.Send(sendSocket.TheSocket, "{\"moving\":\"up\"}");
+    }
+
+    public void MoveDown()
+    {
+        if (sendSocket != null)
+            Networking.Send(sendSocket.TheSocket, "{\"moving\":\"down\"}");
+    }
+
+    public void MoveRight()
+    {
+        if (sendSocket != null)
+            Networking.Send(sendSocket.TheSocket, "{\"moving\":\"right\"}");
+    }
+
+    public void MoveLeft()
+    {
+        if (sendSocket != null)
+            Networking.Send(sendSocket.TheSocket, "{\"moving\":\"left\"}");
     }
 
     /// <summary>
@@ -179,7 +206,7 @@ public class GameController
     {
 
         // TODO: Deactivate connect button when connection is established
-
+        sendSocket = state;
 
         // build the incoming messages
         List<string> parts = BuildIncomingData(state);
