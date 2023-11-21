@@ -98,7 +98,7 @@ public class GameController
                 movementRequest = "{\"moving\":\"right\"}";
                 break;
         }
-        
+
     }
 
     /// <summary>
@@ -120,22 +120,28 @@ public class GameController
         // deal with movement request
         if (movementRequest != null && sendSocket != null)
         {
-            // send the request
-            Debug.WriteLine("Sending movement request: " + movementRequest);
-            Networking.Send(sendSocket.TheSocket, movementRequest);
-            // set it to null to signify request has been processed
-            movementRequest = null;
+            lock (sendSocket)
+            {
+                // send the request
+                Debug.WriteLine("Sending movement request: " + movementRequest);
+                Networking.Send(state.TheSocket, movementRequest+"\n");
+                // set it to null to signify request has been processed
+                movementRequest = null;
+            }
         }
 
-        // Do event when Server sends player ID and size of world
-        if (!handshakeComplete)
-        {
-            ProcessInitialMessages(state);
-        }
-        else
-        {
-            ProcessMessages(state);
-        }
+
+            // Do event when Server sends player ID and size of world
+            if (!handshakeComplete)
+            {
+                ProcessInitialMessages(state);
+            }
+            else
+            {
+                ProcessMessages(state);
+            }
+
+        
 
 
 
@@ -152,14 +158,16 @@ public class GameController
         // Assemble incoming data from server
         List<string> incomingData = BuildIncomingData(state);
 
-        // update model using the data
-        for (int i = 0; i < incomingData.Count; i++)
+        lock (world)
         {
-            if (incomingData[i].Length != 0)
-                world.UpdateWorld(incomingData[i]);
+            // update model using the data
+            for (int i = 0; i < incomingData.Count; i++)
+            {
+                if (incomingData[i].Length != 0)
+                    world.UpdateWorld(incomingData[i]);
+            }
         }
 
-        
 
 
         // Tell View that the world has changed
@@ -225,14 +233,19 @@ public class GameController
         // create the actual world class we will use
         world = new World(int.Parse(parts[1]));
 
-        for (int i = 2; i < parts.Count; i++)
+        lock (world)
         {
-            world.UpdateWorld(parts[i]);
-        }
-        // set flag for completed handshake
-        handshakeComplete = true;
 
-        
+
+            for (int i = 2; i < parts.Count; i++)
+            {
+                world.UpdateWorld(parts[i]);
+            }
+            // set flag for completed handshake
+            handshakeComplete = true;
+        }
+
+
         // inform the view of the info about the handshake and give it the world so it has access
         InitialMessagesArrived?.Invoke(parts, world);
 

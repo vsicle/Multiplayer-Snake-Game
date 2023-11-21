@@ -172,8 +172,8 @@ public class WorldPanel : ScrollView, IDrawable
 
             if (tempSnake != null && tempSnake.body != null & tempSnake.body[0] != null)
             {
-                playerX = (float)tempSnake.body[0].GetX();
-                playerY = (float)tempSnake.body[0].GetY();
+                playerX = (float)tempSnake.body[tempSnake.body.Count-1].GetX();
+                playerY = (float)tempSnake.body[tempSnake.body.Count - 1].GetY();
 
 
 
@@ -191,10 +191,10 @@ public class WorldPanel : ScrollView, IDrawable
                 // that one wall and calls WallDrawer as many times as needed at the correct coordinates
                 lock (theWorld.walls)
                 {
-                    foreach (var w in theWorld.walls)
+                    foreach (Wall wall in theWorld.walls.Values)
                     {
 
-                        Wall wall = w.Value;
+                        //Wall wall = w.Value;
 
                         double p1x = wall.p1.GetX();
                         double p2x = wall.p2.GetX();
@@ -207,7 +207,7 @@ public class WorldPanel : ScrollView, IDrawable
                         // drawing along x-axis
                         if (p1x != p2x)
                         {
-                            numWalls = ((int)Math.Abs((p2x - p1x) / 50.0));
+                            numWalls = ((int)Math.Abs((p2x - p1x) / 50.0)+1);
 
                             for (int i = 0; i < numWalls; i++)
                             {
@@ -224,9 +224,9 @@ public class WorldPanel : ScrollView, IDrawable
                             }
                         }
                         // drawing along y-axis
-                        else
+                        else if(p1y != p2y)
                         {
-                            numWalls = ((int)Math.Abs((p2y - p1y) / 50.0));
+                            numWalls = ((int)Math.Abs((p2y - p1y) / 50.0)+1);
                             for (int i = 0; i < numWalls; i++)
                             {
                                 if (p2y - p1y < 0)
@@ -238,6 +238,10 @@ public class WorldPanel : ScrollView, IDrawable
                                     DrawObjectWithTransform(canvas, wall, p1x, p1y + (50 * i), 0, WallDrawer);
                                 }
                             }
+                        }
+                        else
+                        {
+                            DrawObjectWithTransform(canvas, wall, p1x, p1y, 0, WallDrawer);
                         }
                     }
                 }

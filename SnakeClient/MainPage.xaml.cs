@@ -119,7 +119,6 @@ public partial class MainPage : ContentPage
 
     /// <summary>
     /// This is the main drawing method that gets called whenever there is something new to be drawn
-    /// DRAWING HAPPENS HERE
     /// </summary>
     /// <param name="newMessages"></param>
     private void WorldUpdate(IEnumerable<string> newMessages)
