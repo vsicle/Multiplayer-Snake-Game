@@ -111,7 +111,7 @@ public class WorldPanel : ScrollView, IDrawable
     private void SnakeSegmentDrawer(object obj, int _id, ICanvas canvas)
     {
         // temproraily draw a circle for the head
-        List <Vector2D> vectorList = (List<Vector2D>)obj;
+        List<Vector2D> vectorList = (List<Vector2D>)obj;
 
         if (_id % 8 == 0)
         {
@@ -162,7 +162,7 @@ public class WorldPanel : ScrollView, IDrawable
                 yCoord = vectorList[1].Y;
             }
             // this drawing could be a little off to the side, maybe need to center it?
-            canvas.FillRoundedRectangle((float)smallerXCoord, (float)yCoord-5, (float)Math.Abs(vectorList[0].X - vectorList[1].X), 10, 5);
+            canvas.FillRoundedRectangle((float)smallerXCoord, (float)yCoord - 5, (float)Math.Abs(vectorList[0].X - vectorList[1].X), 10, 5);
 
         }
         else
@@ -209,7 +209,7 @@ public class WorldPanel : ScrollView, IDrawable
 
             if (tempSnake != null && tempSnake.body != null & tempSnake.body[0] != null)
             {
-                playerX = (float)tempSnake.body[tempSnake.body.Count-1].GetX();
+                playerX = (float)tempSnake.body[tempSnake.body.Count - 1].GetX();
                 playerY = (float)tempSnake.body[tempSnake.body.Count - 1].GetY();
 
 
@@ -244,7 +244,7 @@ public class WorldPanel : ScrollView, IDrawable
                         // drawing along x-axis
                         if (p1x != p2x)
                         {
-                            numWalls = ((int)Math.Abs((p2x - p1x) / 50.0)+1);
+                            numWalls = ((int)Math.Abs((p2x - p1x) / 50.0) + 1);
 
                             for (int i = 0; i < numWalls; i++)
                             {
@@ -261,9 +261,9 @@ public class WorldPanel : ScrollView, IDrawable
                             }
                         }
                         // drawing along y-axis
-                        else if(p1y != p2y)
+                        else if (p1y != p2y)
                         {
-                            numWalls = ((int)Math.Abs((p2y - p1y) / 50.0)+1);
+                            numWalls = ((int)Math.Abs((p2y - p1y) / 50.0) + 1);
                             for (int i = 0; i < numWalls; i++)
                             {
                                 if (p2y - p1y < 0)
@@ -296,15 +296,23 @@ public class WorldPanel : ScrollView, IDrawable
                 lock (theWorld.snakes)
                 {
                     // for each snake
-                    foreach(var s in theWorld.snakes)
+                    foreach (Snake snake in theWorld.snakes.Values)
                     {
-                        Snake snake = s.Value;
 
-                        int id = snake.snake;
-                        // draw each segment
-                        for(int i = 1; i < snake.body.Count; i++)
+                        if (snake.died != true)
                         {
-                            SnakeSegmentDrawer(snake.body.GetRange(i-1, 2), id, canvas);
+
+                            int id = snake.snake;
+                            // draw each segment
+                            for (int i = 1; i < snake.body.Count; i++)
+                            {
+                                SnakeSegmentDrawer(snake.body.GetRange(i - 1, 2), id, canvas);
+                                if (i == snake.body.Count - 1)
+                                {
+                                    HorizontalAlignment alignment = HorizontalAlignment.Center;
+                                    canvas.DrawString(snake.name, (float)snake.body[i].GetX(), (float)snake.body[i].GetY(), alignment);
+                                }
+                            }
                         }
                     }
                 }

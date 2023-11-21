@@ -116,7 +116,6 @@ public class GameController
             return;
         }
 
-        // TODO: make this work, maybe move it somehwere
         // deal with movement request
         if (movementRequest != null && sendSocket != null)
         {

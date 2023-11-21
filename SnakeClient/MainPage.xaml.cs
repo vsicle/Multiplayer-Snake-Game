@@ -17,6 +17,7 @@ public partial class MainPage : ContentPage
         GC.InitialMessagesArrived += InitialWorldUpdate;
         GC.MessagesArrived += WorldUpdate;
         GC.Connected += HandleConnected;
+        GC.Error += NetworkErrorHandler;
 
 
     }
@@ -47,9 +48,9 @@ public partial class MainPage : ContentPage
         entry.Text = "";
     }
 
-    private void NetworkErrorHandler()
+    private void NetworkErrorHandler(string error)
     {
-        DisplayAlert("Error", "Disconnected from server", "OK");
+        DisplayAlert("Error", error, "OK");
     }
 
 
