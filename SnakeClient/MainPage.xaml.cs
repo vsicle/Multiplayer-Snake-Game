@@ -27,7 +27,7 @@ public partial class MainPage : ContentPage
     /// </summary>
     private void HandleConnected()
     {
-        Debug.WriteLine("Connected (from VIEW)");
+
 
     }
 
@@ -125,16 +125,6 @@ public partial class MainPage : ContentPage
     private void WorldUpdate(IEnumerable<string> newMessages)
     {
 
-        // TODO: Make the drawing happen here using the world class as the source of info
-        // of what to draw
-
-
-
-        //foreach (string p in newMessages)
-        //{
-        //    Debug.WriteLine("From server: " + p);
-
-        //}
 
         graphicsView.Invalidate();
 
@@ -151,14 +141,6 @@ public partial class MainPage : ContentPage
 
         // save the world
         this.world = world;
-
-        // display each new message in the text area
-        foreach (string p in newMessages)
-        {
-            Debug.WriteLine("From server: " + p);
-        }
-
-        Debug.WriteLine(world.walls.Count);
 
         worldPanel.SetWorld(world, GC.playerID);
 

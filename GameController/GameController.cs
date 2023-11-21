@@ -80,7 +80,6 @@ public class GameController
         Networking.Send(state.TheSocket, PlayerName + "\n");
 
         Connected?.Invoke();
-        Debug.WriteLine("Connected (from controller)");
         state.OnNetworkAction = ReceiveMessage;
         Networking.GetData(state);
 

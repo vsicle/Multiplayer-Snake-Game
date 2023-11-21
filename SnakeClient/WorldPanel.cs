@@ -98,7 +98,8 @@ public class WorldPanel : ScrollView, IDrawable
     private void WallDrawer(object obj, ICanvas canvas)
     {
         Wall w = (Wall)obj;
-        // center the image drawing, draw a wall
+
+        // center the image, draw a wall
         // no logic or math is done here
         canvas.DrawImage(wallImage, -wallImage.Width/2, -wallImage.Height/2, wallImage.Width, wallImage.Height);
     }
@@ -175,8 +176,7 @@ public class WorldPanel : ScrollView, IDrawable
                         // drawing along x-axis
                         if (p1x != p2x)
                         {
-                            numWalls =((int)(p2x - p1x)/50.0);
-                            double adjustmentFactor = (p2x - p1x)/25.0;
+                            numWalls =((int)Math.Abs((p2x - p1x)/50.0));
                             for (int i = 0; i < numWalls; i++)
                             {
                                 DrawObjectWithTransform(canvas, wall, p1x+(50*i), p1y, 0, WallDrawer);
@@ -184,7 +184,7 @@ public class WorldPanel : ScrollView, IDrawable
                         }
                         else
                         {
-                            numWalls = ((int)(p2y - p1y) / 50.0);
+                            numWalls = ((int)Math.Abs((p2y - p1y) / 50.0));
                             double adjustmentFactor = (p2y - p1y) / 50.0;
                             for (int i = 0; i < numWalls; i++)
                             {
@@ -204,15 +204,7 @@ public class WorldPanel : ScrollView, IDrawable
                     }
                 }
 
-                //lock (theWorld.snakes)
-                //{
-                //    foreach (Snake s in theWorld.snakes.Values)
-                //    {
-                //        // Loop through snake segments, calculate segment length and segment direction
-                //        // Set the Stroke Color, etc, based on s's ID
-                //        DrawObjectWithTransform(canvas, segmentLength, segmentX, segmentY, segmentDirection, SnakeSegmentDrawer);
-                //    }
-                //}
+
             }
         }
     }
