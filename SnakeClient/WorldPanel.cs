@@ -113,6 +113,40 @@ public class WorldPanel : ScrollView, IDrawable
         // temproraily draw a circle for the head
         List <Vector2D> vectorList = (List<Vector2D>)obj;
 
+        if (_id % 8 == 0)
+        {
+            canvas.FillColor = Colors.Blue;
+        }
+        else if (_id % 8 == 1)
+        {
+            canvas.FillColor = Colors.Orange;
+        }
+        else if (_id % 8 == 2)
+        {
+            canvas.FillColor = Colors.Green;
+        }
+        else if (_id % 8 == 3)
+        {
+            canvas.FillColor = Colors.Red;
+        }
+        else if (_id % 8 == 4)
+        {
+            canvas.FillColor = Colors.Yellow;
+        }
+        else if (_id % 8 == 5)
+        {
+            canvas.FillColor = Colors.Purple;
+        }
+        else if (_id % 8 == 6)
+        {
+            canvas.FillColor = Colors.Brown;
+        }
+        else
+        {
+            canvas.FillColor = Colors.Aqua;
+        }
+
+
         if (vectorList[0].X != vectorList[1].X)
         {
             double yCoord = vectorList[0].Y;
@@ -126,40 +160,7 @@ public class WorldPanel : ScrollView, IDrawable
                 smallerXCoord = vectorList[1].X;
             }
             // this drawing could be a little off to the side, maybe need to center it?
-            canvas.DrawRoundedRectangle((float)smallerXCoord, (float)yCoord, (float)Math.Abs(vectorList[0].X - vectorList[1].X), 10, 5);
-
-            if (_id % 8 == 0)
-            {
-                canvas.FillColor = Colors.Blue;
-            }
-            else if (_id % 8 == 1)
-            {
-                canvas.FillColor = Colors.Orange;
-            }
-            else if (_id % 8 == 2)
-            {
-                canvas.FillColor = Colors.Green;
-            }
-            else if (_id % 8 == 3)
-            {
-                canvas.FillColor = Colors.Red;
-            }
-            else if (_id % 8 == 4)
-            {
-                canvas.FillColor = Colors.Yellow;
-            }
-            else if (_id % 8 == 5)
-            {
-                canvas.FillColor = Colors.Purple;
-            }
-            else if (_id % 8 == 6)
-            {
-                canvas.FillColor = Colors.Brown;
-            }
-            else
-            {
-                canvas.FillColor = Colors.Aqua;
-            }
+            canvas.FillRoundedRectangle((float)smallerXCoord, (float)yCoord, (float)Math.Abs(vectorList[0].X - vectorList[1].X), 10, 5);
 
         }
         else
@@ -175,45 +176,9 @@ public class WorldPanel : ScrollView, IDrawable
                 smallerYCoord = vectorList[1].Y;
             }
             // this drawing could be a little off to the side, maybe need to center it?
-            canvas.DrawRoundedRectangle((float)xCoord, (float)smallerYCoord, 10, (float)Math.Abs(vectorList[0].Y - vectorList[1].Y), 5);
-
-            if (_id % 8 == 0)
-            {
-                canvas.FillColor = Colors.Blue;
-            }
-            else if (_id % 8 == 1)
-            {
-                canvas.FillColor = Colors.Orange;
-            }
-            else if (_id % 8 == 2)
-            {
-                canvas.FillColor = Colors.Green;
-            }
-            else if (_id % 8 == 3)
-            {
-                canvas.FillColor = Colors.Red;
-            }
-            else if (_id % 8 == 4)
-            {
-                canvas.FillColor = Colors.Yellow;
-            }
-            else if (_id % 8 == 5)
-            {
-                canvas.FillColor = Colors.Purple;
-            }
-            else if (_id % 8 == 6)
-            {
-                canvas.FillColor = Colors.Brown;
-            }
-            else
-            {
-                canvas.FillColor = Colors.Aqua;
-            }
+            canvas.FillRoundedRectangle((float)xCoord, (float)smallerYCoord, 10, (float)Math.Abs(vectorList[0].Y - vectorList[1].Y), 5);
 
         }
-
-        //int snakeSegmentLength = o as int;
-        //canvas.DrawLine(0, 0, 0, -snakeSegmentLength);
     }
 
     private void PowerupDrawer(object obj, ICanvas canvas)
