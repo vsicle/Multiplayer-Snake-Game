@@ -177,18 +177,35 @@ public class WorldPanel : ScrollView, IDrawable
                         if (p1x != p2x)
                         {
                             numWalls =((int)Math.Abs((p2x - p1x)/50.0));
+                            
                             for (int i = 0; i < numWalls; i++)
                             {
-                                DrawObjectWithTransform(canvas, wall, p1x+(50*i), p1y, 0, WallDrawer);
+
+                                if (p2x - p1x < 0)
+                                {
+                                    DrawObjectWithTransform(canvas, wall, p1x + (50 * (-i)), p1y, 0, WallDrawer);
+                                }
+                                else
+                                {
+                                    DrawObjectWithTransform(canvas, wall, p1x + (50 * i), p1y, 0, WallDrawer);
+                                }
+                                
                             }
                         }
+                        // drawing along y-axis
                         else
                         {
                             numWalls = ((int)Math.Abs((p2y - p1y) / 50.0));
-                            double adjustmentFactor = (p2y - p1y) / 50.0;
                             for (int i = 0; i < numWalls; i++)
                             {
-                                DrawObjectWithTransform(canvas, wall, p1x, p1y+(50*i), 0, WallDrawer);
+                                if (p2y - p1y < 0)
+                                {
+                                    DrawObjectWithTransform(canvas, wall, p1x, p1y + (50 * (-i)), 0, WallDrawer);
+                                }
+                                else
+                                {
+                                    DrawObjectWithTransform(canvas, wall, p1x, p1y + (50 * i), 0, WallDrawer);
+                                }
                             }
                         }
                     }

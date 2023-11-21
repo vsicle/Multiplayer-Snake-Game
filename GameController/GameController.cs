@@ -60,14 +60,6 @@ public class GameController
     /// <param name="state"></param>
     private void OnConnect(SocketState state)
     {
-        /*
-
-            theServer = state;
-
-            // Start an event loop to receive messages from the server
-            state.OnNetworkAction = ReceiveMessage;
-            Networking.GetData(state);
-        */
 
         if (state.ErrorOccurred)
         {
@@ -76,6 +68,8 @@ public class GameController
 
             return;
         }
+
+        sendSocket = state;
 
         Networking.Send(state.TheSocket, PlayerName + "\n");
 
@@ -124,11 +118,11 @@ public class GameController
 
         // TODO: make this work, maybe move it somehwere
         // deal with movement request
-        if (movementRequest != null)
+        if (movementRequest != null && sendSocket != null)
         {
             // send the request
             Debug.WriteLine("Sending movement request: " + movementRequest);
-            Networking.Send(state.TheSocket, movementRequest);
+            Networking.Send(sendSocket.TheSocket, movementRequest);
             // set it to null to signify request has been processed
             movementRequest = null;
         }
@@ -219,7 +213,7 @@ public class GameController
     {
 
         // TODO: Deactivate connect button when connection is established
-        sendSocket = state;
+        //sendSocket = state;
 
         // build the incoming messages
         List<string> parts = BuildIncomingData(state);
