@@ -108,7 +108,7 @@ public class WorldPanel : ScrollView, IDrawable
 
 
 
-    private void SnakeSegmentDrawer(object obj, ICanvas canvas)
+    private void SnakeSegmentDrawer(object obj, int _id, ICanvas canvas)
     {
         // temproraily draw a circle for the head
         List <Vector2D> vectorList = (List<Vector2D>)obj;
@@ -127,6 +127,40 @@ public class WorldPanel : ScrollView, IDrawable
             }
             // this drawing could be a little off to the side, maybe need to center it?
             canvas.DrawRoundedRectangle((float)smallerXCoord, (float)yCoord, (float)Math.Abs(vectorList[0].X - vectorList[1].X), 10, 5);
+
+            if (_id % 8 == 0)
+            {
+                canvas.FillColor = Colors.Blue;
+            }
+            else if (_id % 8 == 1)
+            {
+                canvas.FillColor = Colors.Orange;
+            }
+            else if (_id % 8 == 2)
+            {
+                canvas.FillColor = Colors.Green;
+            }
+            else if (_id % 8 == 3)
+            {
+                canvas.FillColor = Colors.Red;
+            }
+            else if (_id % 8 == 4)
+            {
+                canvas.FillColor = Colors.Yellow;
+            }
+            else if (_id % 8 == 5)
+            {
+                canvas.FillColor = Colors.Purple;
+            }
+            else if (_id % 8 == 6)
+            {
+                canvas.FillColor = Colors.Brown;
+            }
+            else
+            {
+                canvas.FillColor = Colors.Aqua;
+            }
+
         }
         else
         {
@@ -142,6 +176,40 @@ public class WorldPanel : ScrollView, IDrawable
             }
             // this drawing could be a little off to the side, maybe need to center it?
             canvas.DrawRoundedRectangle((float)xCoord, (float)smallerYCoord, 10, (float)Math.Abs(vectorList[0].Y - vectorList[1].Y), 5);
+
+            if (_id % 8 == 0)
+            {
+                canvas.FillColor = Colors.Blue;
+            }
+            else if (_id % 8 == 1)
+            {
+                canvas.FillColor = Colors.Orange;
+            }
+            else if (_id % 8 == 2)
+            {
+                canvas.FillColor = Colors.Green;
+            }
+            else if (_id % 8 == 3)
+            {
+                canvas.FillColor = Colors.Red;
+            }
+            else if (_id % 8 == 4)
+            {
+                canvas.FillColor = Colors.Yellow;
+            }
+            else if (_id % 8 == 5)
+            {
+                canvas.FillColor = Colors.Purple;
+            }
+            else if (_id % 8 == 6)
+            {
+                canvas.FillColor = Colors.Brown;
+            }
+            else
+            {
+                canvas.FillColor = Colors.Aqua;
+            }
+
         }
 
         //int snakeSegmentLength = o as int;
@@ -262,10 +330,12 @@ public class WorldPanel : ScrollView, IDrawable
                     foreach(var s in theWorld.snakes)
                     {
                         Snake snake = s.Value;
+
+                        int id = snake.snake;
                         // draw each segment
                         for(int i = 1; i < snake.body.Count; i++)
                         {
-                            SnakeSegmentDrawer(snake.body.GetRange(i-1, 2), canvas);
+                            SnakeSegmentDrawer(snake.body.GetRange(i-1, 2), id, canvas);
                         }
                     }
                 }
