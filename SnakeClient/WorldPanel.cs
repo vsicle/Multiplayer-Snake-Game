@@ -149,34 +149,38 @@ public class WorldPanel : ScrollView, IDrawable
 
         if (vectorList[0].X != vectorList[1].X)
         {
-            double yCoord = vectorList[0].Y;
+            double yCoord = 0;
             double smallerXCoord = 0;
             if (vectorList[0].X < vectorList[1].X)
             {
                 smallerXCoord = vectorList[0].X;
+                yCoord = vectorList[0].Y;
             }
             else
             {
                 smallerXCoord = vectorList[1].X;
+                yCoord = vectorList[1].Y;
             }
             // this drawing could be a little off to the side, maybe need to center it?
-            canvas.FillRoundedRectangle((float)smallerXCoord, (float)yCoord, (float)Math.Abs(vectorList[0].X - vectorList[1].X), 10, 5);
+            canvas.FillRoundedRectangle((float)smallerXCoord, (float)yCoord-5, (float)Math.Abs(vectorList[0].X - vectorList[1].X), 10, 5);
 
         }
         else
         {
-            double xCoord = vectorList[0].X;
+            double xCoord = 0;
             double smallerYCoord = 0;
             if (vectorList[0].Y < vectorList[1].Y)
             {
                 smallerYCoord = vectorList[0].Y;
+                xCoord = vectorList[0].X;
             }
             else
             {
                 smallerYCoord = vectorList[1].Y;
+                xCoord = vectorList[1].X;
             }
             // this drawing could be a little off to the side, maybe need to center it?
-            canvas.FillRoundedRectangle((float)xCoord, (float)smallerYCoord, 10, (float)Math.Abs(vectorList[0].Y - vectorList[1].Y), 5);
+            canvas.FillRoundedRectangle((float)xCoord - 5, (float)smallerYCoord, 10, (float)Math.Abs(vectorList[0].Y - vectorList[1].Y), 5);
 
         }
     }
