@@ -15,6 +15,7 @@ using Font = Microsoft.Maui.Graphics.Font;
 using SizeF = Microsoft.Maui.Graphics.SizeF;
 using Model;
 using Windows.ApplicationModel.VoiceCommands;
+using WinRT;
 
 namespace SnakeGame;
 public class WorldPanel : ScrollView, IDrawable
@@ -101,7 +102,7 @@ public class WorldPanel : ScrollView, IDrawable
 
         // center the image, draw a wall
         // no logic or math is done here
-        canvas.DrawImage(wallImage, -wallImage.Width/2, -wallImage.Height/2, wallImage.Width, wallImage.Height);
+        canvas.DrawImage(wallImage, -wallImage.Width / 2, -wallImage.Height / 2, wallImage.Width, wallImage.Height);
     }
 
 
@@ -110,8 +111,38 @@ public class WorldPanel : ScrollView, IDrawable
     private void SnakeSegmentDrawer(object obj, ICanvas canvas)
     {
         // temproraily draw a circle for the head
-        Snake s = (Snake)obj;
-        canvas.DrawCircle((float)s.body[0].GetX(), (float)s.body[0].GetY(), 20);
+        List <Vector2D> vectorList = (List<Vector2D>)obj;
+
+        if (vectorList[0].X != vectorList[1].X)
+        {
+            double yCoord = vectorList[0].Y;
+            double smallerXCoord = 0;
+            if (vectorList[0].X < vectorList[1].X)
+            {
+                smallerXCoord = vectorList[0].X;
+            }
+            else
+            {
+                smallerXCoord = vectorList[1].X;
+            }
+            // this drawing could be a little off to the side, maybe need to center it?
+            canvas.DrawRoundedRectangle((float)smallerXCoord, (float)yCoord, (float)Math.Abs(vectorList[0].X - vectorList[1].X), 10, 5);
+        }
+        else
+        {
+            double xCoord = vectorList[0].X;
+            double smallerYCoord = 0;
+            if (vectorList[0].Y < vectorList[1].Y)
+            {
+                smallerYCoord = vectorList[0].Y;
+            }
+            else
+            {
+                smallerYCoord = vectorList[1].Y;
+            }
+            // this drawing could be a little off to the side, maybe need to center it?
+            canvas.DrawRoundedRectangle((float)xCoord, (float)smallerYCoord, 10, (float)Math.Abs(vectorList[0].Y - vectorList[1].Y), 5);
+        }
 
         //int snakeSegmentLength = o as int;
         //canvas.DrawLine(0, 0, 0, -snakeSegmentLength);
@@ -149,7 +180,7 @@ public class WorldPanel : ScrollView, IDrawable
                 canvas.Translate(-playerX + (viewSize / 2), -playerY + (viewSize / 2));
 
                 canvas.DrawImage(background, -theWorld.size / 2, -theWorld.size / 2, theWorld.size, theWorld.size);
-                DrawObjectWithTransform(canvas, tempSnake, 0, 0, 0, SnakeSegmentDrawer);
+                //DrawObjectWithTransform(canvas, tempSnake, 0, 0, 0, SnakeSegmentDrawer);
 
 
 
@@ -162,7 +193,7 @@ public class WorldPanel : ScrollView, IDrawable
                 {
                     foreach (var w in theWorld.walls)
                     {
-                        
+
                         Wall wall = w.Value;
 
                         double p1x = wall.p1.GetX();
@@ -176,8 +207,8 @@ public class WorldPanel : ScrollView, IDrawable
                         // drawing along x-axis
                         if (p1x != p2x)
                         {
-                            numWalls =((int)Math.Abs((p2x - p1x)/50.0));
-                            
+                            numWalls = ((int)Math.Abs((p2x - p1x) / 50.0));
+
                             for (int i = 0; i < numWalls; i++)
                             {
 
@@ -189,7 +220,7 @@ public class WorldPanel : ScrollView, IDrawable
                                 {
                                     DrawObjectWithTransform(canvas, wall, p1x + (50 * i), p1y, 0, WallDrawer);
                                 }
-                                
+
                             }
                         }
                         // drawing along y-axis
@@ -221,6 +252,19 @@ public class WorldPanel : ScrollView, IDrawable
                     }
                 }
 
+                lock (theWorld.snakes)
+                {
+                    // for each snake
+                    foreach(var s in theWorld.snakes)
+                    {
+                        Snake snake = s.Value;
+                        // draw each segment
+                        for(int i = 1; i < snake.body.Count; i++)
+                        {
+                            SnakeSegmentDrawer(snake.body.GetRange(i-1, 2), canvas);
+                        }
+                    }
+                }
 
             }
         }
