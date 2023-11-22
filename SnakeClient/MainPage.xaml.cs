@@ -28,7 +28,7 @@ public partial class MainPage : ContentPage
     /// </summary>
     private void HandleConnected()
     {
-
+        
 
     }
 
@@ -50,7 +50,7 @@ public partial class MainPage : ContentPage
 
     private void NetworkErrorHandler(string error)
     {
-        DisplayAlert("Error", error, "OK");
+        Application.Current.Quit();
     }
 
 
