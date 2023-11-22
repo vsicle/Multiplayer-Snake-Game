@@ -310,7 +310,9 @@ public class WorldPanel : ScrollView, IDrawable
                                 if (i == snake.body.Count - 1)
                                 {
                                     HorizontalAlignment alignment = HorizontalAlignment.Center;
-                                    canvas.DrawString(snake.name, (float)snake.body[i].GetX(), (float)snake.body[i].GetY(), alignment);
+                                    string nameString = snake.name + ": " + snake.score;
+                                    canvas.FontColor = Colors.White;
+                                    canvas.DrawString(nameString, (float)snake.body[i].GetX(), (float)snake.body[i].GetY()+20, alignment);
                                 }
                             }
                         }
