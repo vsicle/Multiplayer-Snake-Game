@@ -190,6 +190,8 @@ public class WorldPanel : ScrollView, IDrawable
         Powerup p = (Powerup)obj;
         canvas.FillColor = Colors.Gold;
         canvas.FillCircle(0, 0, 8);
+        canvas.FillColor = Colors.Red;
+        canvas.FillCircle(0, 0, 5);
     }
     public void Draw(ICanvas canvas, RectF dirtyRect)
     {
