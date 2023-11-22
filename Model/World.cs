@@ -40,6 +40,7 @@ namespace Model
         /// update the world, given a JSON string from the server
         /// </summary>
         /// <param name="JsonString"></param>
+
         public void UpdateWorld(string JsonString)
         {
 
@@ -53,8 +54,14 @@ namespace Model
                 Snake? tempSnake = JsonSerializer.Deserialize<Snake>(JsonString);
                 if (tempSnake != null)
                 {
+
                     if (snakes.ContainsKey(tempSnake.snake))
                     {
+                        if (tempSnake.dc)
+                        {
+                            snakes.Remove(tempSnake.snake);
+                            return;
+                        }
                         snakes[tempSnake.snake] = tempSnake;
                     }
                     else
@@ -85,6 +92,11 @@ namespace Model
                 {
                     if (powerups.ContainsKey(tempPower.power))
                     {
+                        if (tempPower.died)
+                        {
+                            powerups.Remove(tempPower.power);
+                            return;
+                        }
                         powerups[tempPower.power] = tempPower;
                     }
                     else
@@ -94,6 +106,7 @@ namespace Model
                 }
             }
         }
+
 
     }
 }
