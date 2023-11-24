@@ -18,6 +18,11 @@ using Windows.ApplicationModel.VoiceCommands;
 using WinRT;
 
 namespace SnakeGame;
+
+/// <summary>
+/// This class draws the state of the World
+/// for the Client.
+/// </summary>
 public class WorldPanel : ScrollView, IDrawable
 {
     private IImage wallImage;
@@ -31,7 +36,7 @@ public class WorldPanel : ScrollView, IDrawable
     float playerY;
 
     private int playerID;
-
+    // Panel size for Client.
     int viewSize = 900;
 
     private bool initializedForDrawing = false;
@@ -49,30 +54,35 @@ public class WorldPanel : ScrollView, IDrawable
 #endif
         }
     }
-
+    /// <summary>
+    /// Empty constructor.
+    /// </summary>
     public WorldPanel()
     {
 
     }
 
+    /// <summary>
+    /// Method used to by View to 
+    /// show World from Client's perspective.
+    /// </summary>
+    /// <param name="w"></param>
+    /// <param name="playerID">Client's unique ID.</param>
     public void SetWorld(World w, int playerID)
     {
         theWorld = w;
         this.playerID = playerID;
-        //Snake tempSnake;
-        //w.snakes.TryGetValue(playerID, out tempSnake);
-        //playerX = (float)tempSnake.body[0].GetX();
-        //playerY = (float)tempSnake.body[0].GetY();
     }
-
+    /// <summary>
+    /// Provided private method to use for drawing
+    /// background and walls.
+    /// </summary>
     private void InitializeDrawing()
     {
         wallImage = loadImage("wallsprite.png");
         background = loadImage("background.png");
         initializedForDrawing = true;
     }
-
-
 
     /// <summary>
     /// This method performs a translation and rotation to draw an object.
@@ -96,6 +106,12 @@ public class WorldPanel : ScrollView, IDrawable
         canvas.RestoreState();
     }
 
+    /// <summary>
+    /// Method to draw wall images.
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="canvas"></param>
+
     private void WallDrawer(object obj, ICanvas canvas)
     {
         Wall w = (Wall)obj;
@@ -105,13 +121,18 @@ public class WorldPanel : ScrollView, IDrawable
         canvas.DrawImage(wallImage, -wallImage.Width / 2, -wallImage.Height / 2, wallImage.Width, wallImage.Height);
     }
 
-
-
-
+    /// <summary>
+    /// Method to draw Snake Segments.
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="_id">Unique Snake ID</param>
+    /// <param name="canvas"></param>
     private void SnakeSegmentDrawer(object obj, int _id, ICanvas canvas)
     {
-        // temproraily draw a circle for the head
+        // Get list of Snake positions.
         List<Vector2D> vectorList = (List<Vector2D>)obj;
+
+        // Assign snake color.
 
         if (_id % 8 == 0)
         {
@@ -146,11 +167,13 @@ public class WorldPanel : ScrollView, IDrawable
             canvas.FillColor = Colors.Aqua;
         }
 
+        // Check to see if snake is horizontal.
 
         if (vectorList[0].X != vectorList[1].X)
         {
             double yCoord = 0;
             double smallerXCoord = 0;
+            // Check to see if snake is headed left or right.
             if (vectorList[0].X < vectorList[1].X)
             {
                 smallerXCoord = vectorList[0].X;
@@ -161,14 +184,17 @@ public class WorldPanel : ScrollView, IDrawable
                 smallerXCoord = vectorList[1].X;
                 yCoord = vectorList[1].Y;
             }
-            // this drawing could be a little off to the side, maybe need to center it?
+            // Fill a rounded rectangle from left to right or right to left.
             canvas.FillRoundedRectangle((float)smallerXCoord, (float)yCoord - 5, (float)Math.Abs(vectorList[0].X - vectorList[1].X), 10, 5);
 
         }
+
+        // Vertical filling logic.
         else
         {
             double xCoord = 0;
             double smallerYCoord = 0;
+            // Check to see if snake is heading down.
             if (vectorList[0].Y < vectorList[1].Y)
             {
                 smallerYCoord = vectorList[0].Y;
@@ -179,11 +205,17 @@ public class WorldPanel : ScrollView, IDrawable
                 smallerYCoord = vectorList[1].Y;
                 xCoord = vectorList[1].X;
             }
-            // this drawing could be a little off to the side, maybe need to center it?
+            // Fill a rounded rectangle up to down or down to up.
             canvas.FillRoundedRectangle((float)xCoord - 5, (float)smallerYCoord, 10, (float)Math.Abs(vectorList[0].Y - vectorList[1].Y), 5);
 
         }
     }
+
+    /// <summary>
+    /// Method to draw PowerUps.
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="canvas"></param>
 
     private void PowerupDrawer(object obj, ICanvas canvas)
     {
@@ -193,38 +225,43 @@ public class WorldPanel : ScrollView, IDrawable
         canvas.FillColor = Colors.Red;
         canvas.FillCircle(0, 0, 5);
     }
+
+    /// <summary>
+    /// This method draws the game. The Client's
+    /// view is centered on the Client in a 900x900 panel.
+    /// </summary>
+    /// <param name="canvas"></param>
+    /// <param name="dirtyRect"></param>
     public void Draw(ICanvas canvas, RectF dirtyRect)
     {
+        // Call Draw at least once before loading images.
         if (!initializedForDrawing)
             InitializeDrawing();
 
         // undo previous transformations from last frame
         canvas.ResetState();
 
-
-
-
+        // If the Model's world has not been created yet or
+        // Snakes have not been received, do not draw.
         if (theWorld != null && theWorld.snakes != null)
         {
+            // Get Client snake.
             Snake tempSnake;
             theWorld.snakes.TryGetValue(playerID, out tempSnake);
 
             if (tempSnake != null && tempSnake.body != null & tempSnake.body[0] != null)
             {
+                // Get Snake head coordinates
                 playerX = (float)tempSnake.body[tempSnake.body.Count - 1].GetX();
                 playerY = (float)tempSnake.body[tempSnake.body.Count - 1].GetY();
 
-
-
+                // Center Panel view on Snake head.
                 canvas.Translate(-playerX + (viewSize / 2), -playerY + (viewSize / 2));
 
                 canvas.DrawImage(background, -theWorld.size / 2, -theWorld.size / 2, theWorld.size, theWorld.size);
-                //DrawObjectWithTransform(canvas, tempSnake, 0, 0, 0, SnakeSegmentDrawer);
 
-
-
-                //draw walls
-                // TODO: nested for loop to draw walls
+                //Draw walls
+                
                 // outer loop iterates through walls
                 // inner loop runs through the number of actual segments that need to be drawn for 
                 // that one wall and calls WallDrawer as many times as needed at the correct coordinates
@@ -285,6 +322,8 @@ public class WorldPanel : ScrollView, IDrawable
                     }
                 }
 
+                // Draw powerups.
+
                 lock (theWorld.powerups)
                 {
                     foreach (var p in theWorld.powerups)
@@ -294,6 +333,8 @@ public class WorldPanel : ScrollView, IDrawable
                             DrawObjectWithTransform(canvas, powerup, powerup.loc.GetX(), powerup.loc.GetY(), 0, PowerupDrawer);
                     }
                 }
+
+                // Draw snakes.
 
                 lock (theWorld.snakes)
                 {
@@ -309,6 +350,7 @@ public class WorldPanel : ScrollView, IDrawable
                             for (int i = 1; i < snake.body.Count; i++)
                             {
                                 SnakeSegmentDrawer(snake.body.GetRange(i - 1, 2), id, canvas);
+                                // Draw player name next to Snake.
                                 if (i == snake.body.Count - 1)
                                 {
                                     HorizontalAlignment alignment = HorizontalAlignment.Center;

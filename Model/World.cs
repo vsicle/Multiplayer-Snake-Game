@@ -13,6 +13,7 @@ namespace Model
         public Dictionary<int, Snake> snakes;
         public Dictionary<int, Powerup> powerups;
         public Dictionary<int, Wall> walls;
+        // World size to use for grid coordinates.
         public int size { get; }
 
         /// <summary>
@@ -37,7 +38,7 @@ namespace Model
         }
 
         /// <summary>
-        /// update the world, given a JSON string from the server
+        /// Method to update the world, given a JSON string from the server
         /// </summary>
         /// <param name="JsonString"></param>
 

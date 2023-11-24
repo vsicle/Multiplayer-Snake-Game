@@ -5,20 +5,19 @@ using Model;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.IO;
-
+/// <summary>
+/// This class is used to manage communication between the Client
+/// and Server.
+/// </summary>
 public class GameController
 {
-    // Controller events that the view can subscribe to
+    // Event for the View to to initialize the World.
     public delegate void InitialMessageHandler(IEnumerable<string> messages, World world);
     public event InitialMessageHandler? InitialMessagesArrived;
 
+    // Event for the View to draw World as Server sends updates.
     public delegate void MessageHandler(IEnumerable<string> messages);
     public event MessageHandler? MessagesArrived;
-
-    // Could also do public event Action<string> MessageArrived;
-
-    public delegate void ConnectedHandler();
-    public event ConnectedHandler? Connected;
 
     public delegate void ErrorHandler(string err);
     public event ErrorHandler? Error;
@@ -31,14 +30,9 @@ public class GameController
 
     private SocketState? sendSocket;
 
-    /// <summary>
-    /// State representing the connection with the server
-    /// </summary>
-    //SocketState? theServer = null;
-
     public GameController()
     {
-        // not used, will be replaced once connection is established
+        // Initialized but not used, will be replaced once connection is established
         world = new World();
     }
 
@@ -70,16 +64,18 @@ public class GameController
         }
 
         sendSocket = state;
-
+        // Initiate protocol with Server.
         Networking.Send(state.TheSocket, PlayerName + "\n");
 
-        Connected?.Invoke();
         state.OnNetworkAction = ReceiveMessage;
         Networking.GetData(state);
 
     }
-    // IMPORTANT THIS SHOULD FIX MOVEMENT CONTROLS
-    // TODO: send movement control once we've recieved all data, then handle movement controls
+    /// <summary>
+    /// Changes controller's movement request variable based on 
+    /// View's passed input.
+    /// </summary>
+    /// <param name="request">View's movement request passed to Controller.</param>
 
     public void MoveRequest(string request)
     {
@@ -103,7 +99,7 @@ public class GameController
 
     /// <summary>
     /// Method to be invoked by the networking library when 
-    /// data is available
+    /// data is available from Server.
     /// </summary>
     /// <param name="state"></param>
     private void ReceiveMessage(SocketState state)
@@ -122,7 +118,6 @@ public class GameController
             lock (sendSocket)
             {
                 // send the request
-                Debug.WriteLine("Sending movement request: " + movementRequest);
                 Networking.Send(state.TheSocket, movementRequest+"\n");
                 // set it to null to signify request has been processed
                 movementRequest = null;
@@ -130,7 +125,8 @@ public class GameController
         }
 
 
-            // Do event when Server sends player ID and size of world
+            // Parse messages differently, depending on 
+            // stage of protocol.
             if (!handshakeComplete)
             {
                 ProcessInitialMessages(state);
@@ -140,18 +136,17 @@ public class GameController
                 ProcessMessages(state);
             }
 
-        
-
-
-
-
         // Continue the event loop
         // state.OnNetworkAction has not been changed, 
         // so this same method (ReceiveMessage) 
         // will be invoked when more data arrives
         Networking.GetData(state);
     }
-
+    /// <summary>
+    /// Method to process powerups, snakes,
+    /// and any other event data from Server.
+    /// </summary>
+    /// <param name="state"></param>
     private void ProcessMessages(SocketState state)
     {
         // Assemble incoming data from server
@@ -167,9 +162,8 @@ public class GameController
             }
         }
 
-
-
         // Tell View that the world has changed
+        // so it can draw the world.
         MessagesArrived?.Invoke(incomingData);
     }
 
@@ -178,7 +172,7 @@ public class GameController
     /// Process any buffered messages separated by '\n'
     /// </summary>
     /// <param name="state"></param>
-    /// <returns>List<string> representing the incoming data in a string list</string></returns>
+    /// <returns>List<string> Representing the incoming data in a string list</string></returns>
     private List<string> BuildIncomingData(SocketState state)
     {
         string totalData = state.GetData();
@@ -212,15 +206,12 @@ public class GameController
     }
 
     /// <summary>
-    /// processes the handshake part of the incoming messages from the server
-    /// Then inform the view
+    /// Pocesses the handshake part of the incoming messages from the server
+    /// Then inform the view.
     /// </summary>
     /// <param name="state"></param>
     private void ProcessInitialMessages(SocketState state)
     {
-
-        // TODO: Deactivate connect button when connection is established
-        //sendSocket = state;
 
         // build the incoming messages
         List<string> parts = BuildIncomingData(state);
@@ -232,6 +223,7 @@ public class GameController
         // create the actual world class we will use
         world = new World(int.Parse(parts[1]));
 
+        // Update walls in Model.
         lock (world)
         {
 

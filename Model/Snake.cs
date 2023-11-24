@@ -10,7 +10,7 @@ using SnakeGame;
 namespace Model
 {
    
-        
+    ///  Class to represent Snakes in World.       
     public class Snake
     {
         [JsonInclude]
@@ -27,8 +27,12 @@ namespace Model
         public bool died { get; }
         [JsonInclude]
         public bool alive { get; }
+        // Variable to indicate if Snake Client disconnected
+        // from server.
         [JsonInclude]
         public bool dc { get; }
+        // Variable indicating if player joined on a frame
+        // (only true one frame).
         [JsonInclude]
         public bool join { get; }
 
