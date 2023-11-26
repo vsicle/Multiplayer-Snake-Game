@@ -1,7 +1,6 @@
 ﻿namespace SnakeGame;
 using Controller;
 using Model;
-using System.Diagnostics;
 /// <summary>
 /// Class for handling GUI events.
 /// </summary>
@@ -12,23 +11,20 @@ public partial class MainPage : ContentPage
 
     public MainPage()
     {
-
         InitializeComponent();
         graphicsView.Invalidate();
-        
+
         GC.InitialMessagesArrived += InitialWorldUpdate;
         GC.MessagesArrived += WorldUpdate;
-       
+
         GC.Error += NetworkErrorHandler;
-
-
     }
 
-   /// <summary>
-   /// Method for ScrollView event.
-   /// </summary>
-   /// <param name="sender"></param>
-   /// <param name="args"></param>
+    /// <summary>
+    /// Method for ScrollView event.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="args"></param>
 
     void OnTapped(object sender, EventArgs args)
     {
@@ -45,10 +41,13 @@ public partial class MainPage : ContentPage
     {
         Entry entry = (Entry)sender;
         String text = entry.Text.ToLower();
-        if(text.Equals("w") || text.Equals("a") || text.Equals("s") || text.Equals("d"))
+
+        // if input is acceptable send the request
+        if (text.Equals("w") || text.Equals("a") || text.Equals("s") || text.Equals("d"))
         {
             GC.MoveRequest(text);
         }
+        // clear text box to be ready for next input
         entry.Text = "";
     }
 
@@ -169,7 +168,7 @@ public partial class MainPage : ContentPage
 
         worldPanel.SetWorld(world, GC.playerID);
 
-        
+
 
     }
 }

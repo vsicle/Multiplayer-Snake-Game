@@ -1,10 +1,7 @@
 ﻿namespace Controller;
-using NetworkUtil;
 using Model;
-
-using System.Diagnostics;
+using NetworkUtil;
 using System.Text.RegularExpressions;
-using System.IO;
 /// <summary>
 /// This class is used to manage communication between the Client
 /// and Server.
@@ -118,23 +115,23 @@ public class GameController
             lock (sendSocket)
             {
                 // send the request
-                Networking.Send(state.TheSocket, movementRequest+"\n");
+                Networking.Send(state.TheSocket, movementRequest + "\n");
                 // set it to null to signify request has been processed
                 movementRequest = null;
             }
         }
 
 
-            // Parse messages differently, depending on 
-            // stage of protocol.
-            if (!handshakeComplete)
-            {
-                ProcessInitialMessages(state);
-            }
-            else
-            {
-                ProcessMessages(state);
-            }
+        // Parse messages differently, depending on 
+        // stage of protocol.
+        if (!handshakeComplete)
+        {
+            ProcessInitialMessages(state);
+        }
+        else
+        {
+            ProcessMessages(state);
+        }
 
         // Continue the event loop
         // state.OnNetworkAction has not been changed, 
@@ -200,8 +197,6 @@ public class GameController
             state.RemoveData(0, p.Length);
         }
 
-
-
         return newMessages;
     }
 
@@ -226,8 +221,6 @@ public class GameController
         // Update walls in Model.
         lock (world)
         {
-
-
             for (int i = 2; i < parts.Count; i++)
             {
                 world.UpdateWorld(parts[i]);
@@ -236,11 +229,8 @@ public class GameController
             handshakeComplete = true;
         }
 
-
         // inform the view of the info about the handshake and give it the world so it has access
         InitialMessagesArrived?.Invoke(parts, world);
-
-
     }
 }
 

@@ -1,21 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using IImage = Microsoft.Maui.Graphics.IImage;
+﻿using IImage = Microsoft.Maui.Graphics.IImage;
 #if MACCATALYST
 using Microsoft.Maui.Graphics.Platform;
 #else
 using Microsoft.Maui.Graphics.Win2D;
 #endif
-using Color = Microsoft.Maui.Graphics.Color;
 using System.Reflection;
-using Microsoft.Maui;
-using System.Net;
-using Font = Microsoft.Maui.Graphics.Font;
-using SizeF = Microsoft.Maui.Graphics.SizeF;
 using Model;
-using Windows.ApplicationModel.VoiceCommands;
-using WinRT;
 
 namespace SnakeGame;
 
@@ -261,7 +251,6 @@ public class WorldPanel : ScrollView, IDrawable
                 canvas.DrawImage(background, -theWorld.size / 2, -theWorld.size / 2, theWorld.size, theWorld.size);
 
                 //Draw walls
-                
                 // outer loop iterates through walls
                 // inner loop runs through the number of actual segments that need to be drawn for 
                 // that one wall and calls WallDrawer as many times as needed at the correct coordinates
@@ -356,7 +345,7 @@ public class WorldPanel : ScrollView, IDrawable
                                     HorizontalAlignment alignment = HorizontalAlignment.Center;
                                     string nameString = snake.name + ": " + snake.score;
                                     canvas.FontColor = Colors.White;
-                                    canvas.DrawString(nameString, (float)snake.body[i].GetX(), (float)snake.body[i].GetY()+20, alignment);
+                                    canvas.DrawString(nameString, (float)snake.body[i].GetX(), (float)snake.body[i].GetY() + 20, alignment);
                                 }
                             }
                         }
