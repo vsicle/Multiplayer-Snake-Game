@@ -122,7 +122,6 @@ public partial class MainPage : ContentPage
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-
     private void AboutButton_Clicked(object sender, EventArgs e)
     {
         DisplayAlert("About",
@@ -136,7 +135,6 @@ public partial class MainPage : ContentPage
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-
     private void ContentPage_Focused(object sender, FocusEventArgs e)
     {
         if (!connectButton.IsEnabled)
@@ -167,8 +165,6 @@ public partial class MainPage : ContentPage
         this.world = world;
 
         worldPanel.SetWorld(world, GC.playerID);
-
-
 
     }
 }

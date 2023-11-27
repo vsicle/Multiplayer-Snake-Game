@@ -18,7 +18,7 @@ namespace Model
     public class CtrlCommand
     {
         [JsonInclude]
-        public string moving {get;}
+        private string moving { get; set; }
 
         [JsonConstructor]
         public CtrlCommand(string moving)
