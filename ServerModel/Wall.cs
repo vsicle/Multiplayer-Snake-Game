@@ -13,13 +13,13 @@ namespace ServerModel
     public class Wall
     {
         [DataMember(Order = 0)]
-        public int ID { get; }
+        public int ID { get; set; }
 
         [DataMember(Order = 1)]
-        public Vector2D p1 { get; }
+        public Vector2D p1 { get; set; }
 
         [DataMember(Order = 2)]
-        public Vector2D p2 { get; }
+        public Vector2D p2 { get; set; }
 
         public Wall(int _ID, Vector2D p1, Vector2D p2)
         {

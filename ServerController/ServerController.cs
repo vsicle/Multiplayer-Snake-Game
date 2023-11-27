@@ -11,7 +11,9 @@ namespace ServerController
 
         static void Main(string[] args)
         {
-            using (XmlReader reader = XmlReader.Create("WorldSettings.xml"))
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.IgnoreWhitespace = true;
+            using (XmlReader reader = XmlReader.Create("WorldSettings.xml", settings))
             {
                 DataContractSerializer serializer = new DataContractSerializer(typeof(World));
                 World? theWorld = (World?)serializer.ReadObject(reader);

@@ -15,13 +15,13 @@ namespace ServerModel
         public int UniverseSize;
 
         [DataMember]
-        public int MaxPowerups;
+        public int MaxPowerups { get; set; }
 
         [DataMember]
-        public int PowerupDelay;
+        public int PowerupDelay { get; set; }
 
         [DataMember]
-        public int DefaultSnakeSpeed;
+        public int DefaultSnakeSpeed { get; set; }
 
         [DataMember]
         public List<Wall> Walls;
