@@ -73,7 +73,6 @@ public class GameController
     /// View's passed input.
     /// </summary>
     /// <param name="request">View's movement request passed to Controller.</param>
-
     public void MoveRequest(string request)
     {
         switch (request)
@@ -139,6 +138,8 @@ public class GameController
         // will be invoked when more data arrives
         Networking.GetData(state);
     }
+
+
     /// <summary>
     /// Method to process powerups, snakes,
     /// and any other event data from Server.
@@ -190,7 +191,7 @@ public class GameController
             if (p[p.Length - 1] != '\n')
                 break;
 
-            // build a list of messages to send to the view
+            // build the list of messages
             newMessages.Add(p);
 
             // Then remove it from the SocketState's growable buffer
