@@ -6,29 +6,45 @@ namespace ServerModel
     public class World
     {
         [DataMember]
+
         public int MSPerFrame;
 
         [DataMember]
+
         public int RespawnRate;
 
         [DataMember]
+
         public int UniverseSize;
 
         [DataMember]
-        public int MaxPowerups { get; set; }
+
+        public int MaxPowerups;
 
         [DataMember]
-        public int PowerupDelay { get; set; }
+
+        public int PowerupDelay;
 
         [DataMember]
-        public int DefaultSnakeSpeed { get; set; }
+
+        public int SnakeSpeed;
 
         [DataMember]
+
         public List<Wall> Walls;
-        
+
+        [DataMember]
+
+        public int StartingSnakeLength;
+
+        [DataMember]
+
+        public int SnakeGrowth;
+
         public World()
         {
             Walls = new List<Wall>();
+            
         }
 
 
