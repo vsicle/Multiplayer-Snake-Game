@@ -7,16 +7,20 @@ using System.Net.Sockets;
 using System.Text.Json.Nodes;
 using System.Text.Json;
 using Model;
+using SnakeGame;
+using System.Runtime.CompilerServices;
 
 namespace ServerController
 {
     public class ServerController
     {
         // Map of Clients
-        private Dictionary<long, SocketState> Clients;
+        private Dictionary<int, SocketState> Clients;
 
         private ServerWorld world;
-        //private int numClients;
+        private int numClients;
+
+        private string TempPlayerName;
 
         public ServerController(ServerWorld _world)
         {
@@ -51,9 +55,21 @@ namespace ServerController
                 }
                 ServerController server = new(XMLWorld);
                 server.StartServer();
+
+                Stopwatch sw = new Stopwatch();
+
+                while (true)
+                {
+
+                    while (sw.ElapsedMilliseconds < this.world.MSPerFrame) { }
+
+                    sw.Restart();
+
+
+
             }
-
-
+            }
+            
 
 
         }
@@ -65,7 +81,8 @@ namespace ServerController
         {
             // This begins an "event loop"
             Networking.StartServer(NewClientConnected, 11000);
-            //numClients = 0;
+            numClients = 0;
+
         }
 
         /// <summary>
@@ -78,11 +95,25 @@ namespace ServerController
             if (state.ErrorOccurred)
                 return;
 
+            List<string> NewPlayerName = BuildIncomingData(state);
+
+            TempPlayerName = NewPlayerName[0];
+
+           
+
+            state.OnNetworkAction = ConnectedCallBack;
+            Networking.GetData(state);
+
+        }
+
+        private void ConnectedCallBack(SocketState state)
+        {
             // Save the client state
             // Need to lock here because clients can disconnect at any time
             lock (Clients)
             {
-                Clients[state.ID] = state;
+                numClients++;
+                Clients[numClients] = state;
             }
 
             // TODO: Send PlayerID, but wasn't sure 
@@ -90,8 +121,16 @@ namespace ServerController
 
             // save player ID in Dictionary?
 
-            Networking.Send(state.TheSocket, state.ID.ToString() + "\n");
+            Networking.Send(state.TheSocket, numClients + "\n");
             Networking.Send(state.TheSocket, world.UniverseSize.ToString() + "\n");
+
+            List<Vector2D> TempBody = new List<Vector2D>();
+            TempBody.Add(new Vector2D(0, -10));
+            TempBody.Add(new Vector2D(0, 0));
+
+
+            Snake NewSnake = new Snake(numClients, TempPlayerName, TempBody, new Vector2D(1, 0), 0, false, true, false, true);
+            world.snakes.Add(numClients, NewSnake);
 
             lock (world)
             {
@@ -120,6 +159,42 @@ namespace ServerController
             //state.OnNetworkAction = ReceiveMessage;
 
             Networking.GetData(state);
+        }
+
+        /// <summary>
+        /// Method to assemble the incoming data into a single, ready to use list
+        /// Process any buffered messages separated by '\n'
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns>List<string> Representing the incoming data in a string list</string></returns>
+        private List<string> BuildIncomingData(SocketState state)
+        {
+            string totalData = state.GetData();
+            string[] parts = Regex.Split(totalData, @"(?<=[\n])");
+
+            // Loop until we have processed all messages.
+            // We may have received more than one.
+
+            List<string> newMessages = new List<string>();
+
+            foreach (string p in parts)
+            {
+                // Ignore empty strings added by the regex splitter
+                if (p.Length == 0)
+                    continue;
+                // The regex splitter will include the last string even if it doesn't end with a '\n',
+                // So we need to ignore it if this happens. 
+                if (p[p.Length - 1] != '\n')
+                    break;
+
+                // build the list of messages
+                newMessages.Add(p);
+
+                // Then remove it from the SocketState's growable buffer
+                state.RemoveData(0, p.Length);
+            }
+
+            return newMessages;
         }
 
 
