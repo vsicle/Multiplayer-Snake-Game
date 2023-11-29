@@ -20,11 +20,11 @@ namespace ServerController
         private ServerWorld world;
         private int numClients;
 
-        private string TempPlayerName;
+        //private string TempPlayerName;
 
         public ServerController(ServerWorld _world)
         {
-            Clients = new Dictionary<long, SocketState>();
+            Clients = new Dictionary<int, SocketState>();
             world = _world;
 
         }
@@ -61,7 +61,7 @@ namespace ServerController
                 while (true)
                 {
 
-                    while (sw.ElapsedMilliseconds < this.world.MSPerFrame) { }
+                    while (sw.ElapsedMilliseconds < server.world.MSPerFrame) { }
 
                     sw.Restart();
 
@@ -95,9 +95,9 @@ namespace ServerController
             if (state.ErrorOccurred)
                 return;
 
-            List<string> NewPlayerName = BuildIncomingData(state);
+            //List<string> NewPlayerName = BuildIncomingData(state);
 
-            TempPlayerName = NewPlayerName[0];
+            //TempPlayerName = NewPlayerName[0];
 
            
 
@@ -129,7 +129,7 @@ namespace ServerController
             TempBody.Add(new Vector2D(0, 0));
 
 
-            Snake NewSnake = new Snake(numClients, TempPlayerName, TempBody, new Vector2D(1, 0), 0, false, true, false, true);
+            Snake NewSnake = new Snake(numClients, "jerry", TempBody, new Vector2D(1, 0), 0, false, true, false, true);
             world.snakes.Add(numClients, NewSnake);
 
             lock (world)
