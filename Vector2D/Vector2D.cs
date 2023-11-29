@@ -4,6 +4,7 @@
 
 using System.Runtime.Serialization;
 using System.Xml.Linq;
+using System.Text.Json.Serialization;
 
 namespace SnakeGame;
 
@@ -13,8 +14,12 @@ namespace SnakeGame;
 [DataContract(Name = "Vector", Namespace = "")] // Used for the server
 public class Vector2D
 {
+    [JsonInclude]
+    [JsonPropertyName("x")]
     [DataMember(Name = "x")]
     public double X { get; set; }
+    [JsonInclude]
+    [JsonPropertyName("y")]
     [DataMember(Name = "y")]
     public double Y { get; set; }
 

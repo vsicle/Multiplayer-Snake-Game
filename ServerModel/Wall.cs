@@ -9,17 +9,29 @@ using SnakeGame;
 
 namespace ServerModel
 {
+    
     [DataContract(Namespace = "")]
     public class Wall
     {
+        [JsonInclude]
+        [JsonPropertyName("wall")]
         [DataMember(Order = 0)]
         public int ID { get; set; }
 
+        [JsonInclude]
         [DataMember(Order = 1)]
         public Vector2D p1 { get; set; }
 
+        [JsonInclude]
         [DataMember(Order = 2)]
         public Vector2D p2 { get; set; }
+
+        public Wall()
+        {
+            ID = 0;
+            p1 = new Vector2D();
+            p2 = new Vector2D();
+        }
 
         public Wall(int _ID, Vector2D p1, Vector2D p2)
         {

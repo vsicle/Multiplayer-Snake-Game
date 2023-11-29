@@ -1,10 +1,11 @@
-﻿using ServerModel;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Xml;
 using NetworkUtil;
 using System.Net.Sockets;
+using System.Text.Json;
+using Model;
 
 namespace ServerController
 {
@@ -82,14 +83,14 @@ namespace ServerController
                 Clients[state.ID] = state;
             }
 
-            // TODO: Send PlayerID, but wasn't sure 
-            // where we should save PlayerID in Server
+            
             //Networking.Send(state.TheSocket, );
             Networking.Send(state.TheSocket, world.UniverseSize.ToString() + "\n");
 
             foreach (Wall wall in world.Walls)
             {
-                Networking.Send(state.TheSocket, wall.ToString() + "\n");
+                string WallJsonString = System.Text.Json.JsonSerializer.Serialize(wall);
+                Networking.Send(state.TheSocket, WallJsonString + "\n");
             }
 
             // TODO:
