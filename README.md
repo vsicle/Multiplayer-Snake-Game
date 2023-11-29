@@ -43,4 +43,9 @@ we successfully drew background and translated view on player's snake head.
 segment drawing commpleted. Added logic to remove dead powerups & disconnected snakes from World. 3 Clients playing @ 30 fps 
 works.
 
+PS9
+
+11/26/2023 - Added ServerController and ServerModel projects to SnakeGame solution. Began implementation to read XML server settings.
+
+11/28/2023 - Arranged XML tags in alphabetical order in XML server settings to read in correctly.
 
