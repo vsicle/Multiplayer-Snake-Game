@@ -161,6 +161,33 @@ namespace ServerController
             Networking.GetData(state);
         }
 
+        private void UpdateWorld()
+        {
+            
+            lock (world)
+            {
+                foreach (SocketState state in Clients.Values)
+                {
+                    foreach (Wall wall in world.Walls)
+                    {
+                        Networking.Send(state.TheSocket, JsonSerializer.Serialize(wall) + "\n");
+                    }
 
+                    // send all objects in the current world,
+                    // TODO: maybe copy or move this somewhere?
+                    foreach (Snake snake in world.snakes.Values)
+                    {
+                        Networking.Send(state.TheSocket, JsonSerializer.Serialize(snake) + "\n");
+                    }
+
+                    foreach (Powerup powerup in world.powerups.Values)
+                    {
+                        Networking.Send(state.TheSocket, JsonSerializer.Serialize(powerup) + "\n");
+                    }
+                }
+                
+            }
+
+        }
     }
 }
