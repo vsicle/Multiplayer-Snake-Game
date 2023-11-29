@@ -19,4 +19,10 @@
     <ProjectReference Include="..\ServerModel\ServerModel.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="NetworkController">
+      <HintPath>..\NetworkController\Libraries\NetworkController.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

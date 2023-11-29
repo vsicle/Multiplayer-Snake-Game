@@ -27,5 +27,10 @@ namespace ServerModel
             this.p1 = p1;
             this.p2 = p2;
         }
+
+        public override String ToString()
+        {
+            return "{\"wall\":" + ID.ToString() + ",\"p1\":{\"x\":" + p1.GetX().ToString() + ",\"y\":" + p1.GetY().ToString() + "},\"p2\":{\"x\":" + p2.GetX().ToString() + ",\"y\":" + p2.GetY().ToString() + "}}";
+        }
     }
 }
