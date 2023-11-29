@@ -161,42 +161,6 @@ namespace ServerController
             Networking.GetData(state);
         }
 
-        /// <summary>
-        /// Method to assemble the incoming data into a single, ready to use list
-        /// Process any buffered messages separated by '\n'
-        /// </summary>
-        /// <param name="state"></param>
-        /// <returns>List<string> Representing the incoming data in a string list</string></returns>
-        private List<string> BuildIncomingData(SocketState state)
-        {
-            string totalData = state.GetData();
-            string[] parts = Regex.Split(totalData, @"(?<=[\n])");
-
-            // Loop until we have processed all messages.
-            // We may have received more than one.
-
-            List<string> newMessages = new List<string>();
-
-            foreach (string p in parts)
-            {
-                // Ignore empty strings added by the regex splitter
-                if (p.Length == 0)
-                    continue;
-                // The regex splitter will include the last string even if it doesn't end with a '\n',
-                // So we need to ignore it if this happens. 
-                if (p[p.Length - 1] != '\n')
-                    break;
-
-                // build the list of messages
-                newMessages.Add(p);
-
-                // Then remove it from the SocketState's growable buffer
-                state.RemoveData(0, p.Length);
-            }
-
-            return newMessages;
-        }
-
 
     }
 }
