@@ -15,10 +15,10 @@ namespace ServerController
         // Map of Clients
         private Dictionary<long, SocketState> Clients;
 
-        private World world;
+        private ServerWorld world;
         //private int numClients;
 
-        public ServerController(World _world)
+        public ServerController(ServerWorld _world)
         {
             Clients = new Dictionary<long, SocketState>();
             world = _world;
@@ -29,12 +29,12 @@ namespace ServerController
         {
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.IgnoreWhitespace = true;
-            World? XMLWorld;
+            ServerWorld? XMLWorld;
             using (XmlReader reader = XmlReader.Create("WorldSettings.xml", settings))
             {
 
-                DataContractSerializer serializer = new DataContractSerializer(typeof(World));
-                XMLWorld = (World?)serializer.ReadObject(reader);
+                DataContractSerializer serializer = new DataContractSerializer(typeof(ServerWorld));
+                XMLWorld = (ServerWorld?)serializer.ReadObject(reader);
                 while (XMLWorld == null)
                 {
                     Console.WriteLine("World is null, possibly incorrect world settings. Fix XML document, close and restart Server.");

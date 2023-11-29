@@ -1,10 +1,10 @@
 ﻿using Model;
 using System.Runtime.Serialization;
 
-namespace ServerModel
+namespace Model
 {
     [DataContract(Namespace = "")]
-    public class World
+    public class ServerWorld : World
     {
         [DataMember]
 
@@ -42,7 +42,7 @@ namespace ServerModel
 
         public int SnakeGrowth;
 
-        public World()
+        public ServerWorld()
         {
             Walls = new List<Wall>();
 

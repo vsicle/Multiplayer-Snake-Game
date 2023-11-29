@@ -17,15 +17,15 @@ namespace Model
     {
         [JsonInclude]
         [DataMember(Order = 0)]
-        public int wall { get; }
+        public int wall { get; set; }
 
         [JsonInclude]
         [DataMember(Order = 1)]
-        public Vector2D p1 { get;}
+        public Vector2D p1 { get; set; }
 
         [JsonInclude]
         [DataMember(Order = 2)]
-        public Vector2D p2 {get;}
+        public Vector2D p2 { get; set; }
 
         [JsonConstructor]
         public Wall(int wall, Vector2D p1, Vector2D p2)

@@ -9,45 +9,10 @@ namespace Model
     /// <summary>
     /// This class contains all the objects the Server sends.
     /// </summary>
+
     [DataContract(Namespace = "")]
     public class World
     {
-        [DataMember]
-
-        public int MSPerFrame;
-
-        [DataMember]
-
-        public int RespawnRate;
-
-        [DataMember]
-
-        public int UniverseSize;
-
-        [DataMember]
-
-        public int MaxPowerups;
-
-        [DataMember]
-
-        public int PowerupDelay;
-
-        [DataMember]
-
-        public int SnakeSpeed;
-
-        [DataMember]
-
-        public List<Wall> Walls;
-
-        [DataMember]
-
-        public int StartingSnakeLength;
-
-        [DataMember]
-
-        public int SnakeGrowth;
-
 
         public Dictionary<int, Snake> snakes;
         public Dictionary<int, Powerup> powerups;
@@ -63,7 +28,7 @@ namespace Model
             snakes = new Dictionary<int, Snake>();
             powerups = new Dictionary<int, Powerup>();
             walls = new Dictionary<int, Wall>();
-            Walls = new List<Wall>();
+            
         }
 
         /// <summary>
@@ -75,7 +40,7 @@ namespace Model
             powerups = new Dictionary<int, Powerup>();
             walls = new Dictionary<int, Wall>();
             size = worldSize;
-            Walls = new List<Wall>();
+            
         }
 
         /// <summary>
