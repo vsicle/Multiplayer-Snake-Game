@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using System.Xml;
 using NetworkUtil;
 using System.Net.Sockets;
+using System.Text.Json.Nodes;
 using System.Text.Json;
 using Model;
 
@@ -15,13 +16,13 @@ namespace ServerController
         private Dictionary<long, SocketState> Clients;
 
         private World world;
-
+        //private int numClients;
 
         public ServerController(World _world)
         {
             Clients = new Dictionary<long, SocketState>();
             world = _world;
-            
+
         }
 
         static void Main(string[] args)
@@ -31,16 +32,16 @@ namespace ServerController
             World? XMLWorld;
             using (XmlReader reader = XmlReader.Create("WorldSettings.xml", settings))
             {
-                
+
                 DataContractSerializer serializer = new DataContractSerializer(typeof(World));
                 XMLWorld = (World?)serializer.ReadObject(reader);
                 while (XMLWorld == null)
                 {
                     Console.WriteLine("World is null, possibly incorrect world settings. Fix XML document, close and restart Server.");
                 }
-                
+
             }
-            
+
             if (XMLWorld != null)
             {
                 while (XMLWorld.MaxPowerups > 100 || XMLWorld.SnakeSpeed > 9 || XMLWorld.StartingSnakeLength > 360 || XMLWorld.SnakeGrowth > 600)
@@ -52,8 +53,8 @@ namespace ServerController
                 server.StartServer();
             }
 
-            
-            
+
+
 
         }
 
@@ -64,6 +65,7 @@ namespace ServerController
         {
             // This begins an "event loop"
             Networking.StartServer(NewClientConnected, 11000);
+            //numClients = 0;
         }
 
         /// <summary>
@@ -83,14 +85,32 @@ namespace ServerController
                 Clients[state.ID] = state;
             }
 
-            
-            //Networking.Send(state.TheSocket, );
+            // TODO: Send PlayerID, but wasn't sure 
+            // where we should save PlayerID in Server
+
+            // save player ID in Dictionary?
+
+            Networking.Send(state.TheSocket, state.ID.ToString() + "\n");
             Networking.Send(state.TheSocket, world.UniverseSize.ToString() + "\n");
 
-            foreach (Wall wall in world.Walls)
+            lock (world)
             {
-                string WallJsonString = System.Text.Json.JsonSerializer.Serialize(wall);
-                Networking.Send(state.TheSocket, WallJsonString + "\n");
+                foreach (Wall wall in world.Walls)
+                {
+                    Networking.Send(state.TheSocket, JsonSerializer.Serialize(wall) + "\n");
+                }
+
+                // send all objects in the current world,
+                // TODO: maybe copy or move this somewhere?
+                foreach (Snake snake in world.snakes.Values)
+                {
+                    Networking.Send(state.TheSocket, JsonSerializer.Serialize(snake) + "\n");
+                }
+
+                foreach (Powerup powerup in world.powerups.Values)
+                {
+                    Networking.Send(state.TheSocket, JsonSerializer.Serialize(powerup) + "\n");
+                }
             }
 
             // TODO:
