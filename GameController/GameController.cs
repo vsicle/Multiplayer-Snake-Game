@@ -1,7 +1,11 @@
 ﻿namespace Controller;
 using Model;
 using NetworkUtil;
+using System.Diagnostics;
+using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
+
 /// <summary>
 /// This class is used to manage communication between the Client
 /// and Server.
@@ -193,7 +197,7 @@ public class GameController
 
             // build the list of messages
             newMessages.Add(p);
-
+            Debug.WriteLine(p);
             // Then remove it from the SocketState's growable buffer
             state.RemoveData(0, p.Length);
         }
@@ -229,6 +233,8 @@ public class GameController
             // set flag for completed handshake
             handshakeComplete = true;
         }
+
+        
 
         // inform the view of the info about the handshake and give it the world so it has access
         InitialMessagesArrived?.Invoke(parts, world);

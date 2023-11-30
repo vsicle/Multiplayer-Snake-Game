@@ -37,12 +37,12 @@ namespace Model
         /// <summary>
         /// In case JSON Constructor isn't happy.
         /// </summary>
-        public Wall()
-        {
-            wall = 0;
-            p1 = new Vector2D();
-            p2 = new Vector2D();
-        }
+        //public Wall()
+        //{
+        //    wall = 0;
+        //    p1 = new Vector2D();
+        //    p2 = new Vector2D();
+        //}
 
         /// <summary>
         /// Backup in case JSON Serialization fails.

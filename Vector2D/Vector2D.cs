@@ -15,11 +15,11 @@ namespace SnakeGame;
 public class Vector2D
 {
     [JsonInclude]
-    [JsonPropertyName("x")]
+    [JsonPropertyName("X")]
     [DataMember(Name = "x")]
     public double X { get; set; }
     [JsonInclude]
-    [JsonPropertyName("y")]
+    [JsonPropertyName("Y")]
     [DataMember(Name = "y")]
     public double Y { get; set; }
 
