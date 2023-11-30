@@ -16,7 +16,8 @@ namespace ServerController
     public class ServerController
     {
         // Map of Clients
-        private Dictionary<int, SocketState> Clients;
+        private Dictionary<long, int> IdMap;
+        private List<SocketState> Clients;
 
         private ServerWorld world;
         private int numClients;
@@ -25,7 +26,8 @@ namespace ServerController
 
         public ServerController(ServerWorld _world)
         {
-            Clients = new Dictionary<int, SocketState>();
+            IdMap = new Dictionary<long, int>();
+            Clients = new List<SocketState>();
             world = _world;
             world.snakes = new Dictionary<int, Snake>();
             world.powerups = new Dictionary<int, Powerup>();
@@ -86,6 +88,7 @@ namespace ServerController
             Networking.StartServer(NewClientConnected, 11000);
             numClients = 0;
             Console.WriteLine("Accepting new clients");
+
 
         }
 
@@ -160,7 +163,8 @@ namespace ServerController
             lock (Clients)
             {
                 numClients++;
-                Clients[numClients] = state;
+                Clients.Add(state);
+                IdMap[state.ID] = numClients;
             }
 
             // TODO: Send PlayerID, but wasn't sure 
@@ -215,10 +219,21 @@ namespace ServerController
             if (state.ErrorOccurred)
                 return;
 
+            List<string> movementRequests = BuildIncomingData(state);
 
+            if(movementRequests.Count > 0)
+            {
+                // do the movement request
+                ProcessMovementRequest(movementRequests[0]);
+            }
 
             // update world after checking for 
             UpdateWorld();
+        }
+
+        private void ProcessMovementRequest(string request)
+        {
+
         }
 
         private void UpdateWorld()
@@ -226,7 +241,7 @@ namespace ServerController
             
             lock (world)
             {
-                foreach (SocketState state in Clients.Values)
+                foreach (SocketState state in Clients)
                 {
 
                     // send all objects in the current world,
