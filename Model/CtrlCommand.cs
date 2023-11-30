@@ -12,13 +12,14 @@ namespace Model
 
     A control command consists of the following field (names are important)
     
-    "moving" - a string representing whether the player wants to move or not, and the desired direction. Possible values are:   "none", "up", "left", "down", "right".
+    "moving" - a string representing whether the player wants to move or not, and the desired direction. 
+    Possible values are:   "none", "up", "left", "down", "right".
     {"moving":"left"}
      */
     public class CtrlCommand
     {
         [JsonInclude]
-        private string moving { get; set; }
+        public string moving { get; set; }
 
         [JsonConstructor]
         public CtrlCommand(string moving)

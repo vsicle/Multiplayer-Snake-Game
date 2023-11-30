@@ -20,7 +20,7 @@ namespace Model
         [JsonInclude]
         public List<Vector2D> body { get; }
         [JsonInclude]
-        public Vector2D dir { get; }
+        public Vector2D dir { get; set; }
         [JsonInclude]
         public int score { get; }
         [JsonInclude]

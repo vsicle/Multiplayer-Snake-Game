@@ -10,6 +10,7 @@ using Model;
 using SnakeGame;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Threading.Channels;
 
 namespace ServerController
 {
@@ -18,6 +19,7 @@ namespace ServerController
         // Map of Clients
         private Dictionary<long, int> IdMap;
         private List<SocketState> Clients;
+        private Dictionary<string, Vector2D> cardinalDirections;
 
         private ServerWorld world;
         private int numClients;
@@ -31,6 +33,14 @@ namespace ServerController
             world = _world;
             world.snakes = new Dictionary<int, Snake>();
             world.powerups = new Dictionary<int, Powerup>();
+
+            // fill cardinalDirections dictionary
+            // TODO: make readonly if time allows
+            cardinalDirections = new Dictionary<string, Vector2D>();
+            cardinalDirections["up"] = new Vector2D(0, -1);
+            cardinalDirections["down"] = new Vector2D(0, 1);
+            cardinalDirections["right"] = new Vector2D(-1, 0);
+            cardinalDirections["left"] = new Vector2D(1, 0);
         }
 
         static void Main(string[] args)
@@ -70,9 +80,9 @@ namespace ServerController
 
                     sw.Restart();
                     Console.WriteLine("Frame");
+                    server.UpdateWorld();
 
-
-            }
+                }
             }
             
 
@@ -224,17 +234,40 @@ namespace ServerController
             if(movementRequests.Count > 0)
             {
                 // do the movement request
-                ProcessMovementRequest(movementRequests[0]);
+                ProcessMovementRequest(movementRequests[0], state.ID);
             }
 
-            // update world after checking for 
-            UpdateWorld();
+            
         }
 
-        private void ProcessMovementRequest(string request)
+        private void ProcessMovementRequest(string request, long stateId)
         {
+            int snakeId = IdMap[stateId];
+
+            Snake snake = world.snakes[snakeId];
+
+            CtrlCommand? command = JsonSerializer.Deserialize<CtrlCommand>(request);
+            if(command == null)
+            {
+                return;
+            }
+
+            Vector2D moveRequest = cardinalDirections[command.moving];
+
+            if (!snake.dir.IsOppositeCardinalDirection(moveRequest))
+            {
+                snake.dir = moveRequest;
+                Debug.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
+                Console.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
+            }
+            else
+            {
+                return;
+            }
+
 
         }
+
 
         private void UpdateWorld()
         {
