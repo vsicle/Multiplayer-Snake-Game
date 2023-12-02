@@ -23,6 +23,8 @@ namespace ServerController
 
         private ServerWorld world;
         private int numClients;
+        private List<Tuple<long, String>> ClientMoveRequests;
+
 
         //private string TempPlayerName;
 
@@ -41,6 +43,7 @@ namespace ServerController
             cardinalDirections["down"] = new Vector2D(0, 1);
             cardinalDirections["right"] = new Vector2D(-1, 0);
             cardinalDirections["left"] = new Vector2D(1, 0);
+            ClientMoveRequests = new List<Tuple<long, String>>();
         }
 
         static void Main(string[] args)
@@ -80,6 +83,21 @@ namespace ServerController
 
                     sw.Restart();
                     Console.WriteLine("Frame");
+
+
+
+                    lock(server.ClientMoveRequests)
+                    {
+                        foreach (Tuple<long, String> ClientRequest in server.ClientMoveRequests)
+                        {
+                            server.ProcessMovementRequest(ClientRequest.Item2, ClientRequest.Item1);
+                        }
+                        // Clear ClientRequests
+                        server.ClientMoveRequests.Clear();
+
+                    }
+                    
+
                     server.UpdateWorld();
 
                 }
@@ -233,8 +251,13 @@ namespace ServerController
 
             if(movementRequests.Count > 0)
             {
-                // do the movement request
-                ProcessMovementRequest(movementRequests[0], state.ID);
+                // Add request to List
+                // to prevent trying to modify Snake.dir and 
+                // Serializing snakes
+                lock (ClientMoveRequests)
+                {
+                    ClientMoveRequests.Add(new Tuple<long, String>(state.ID, movementRequests[0]));
+                }
             }
 
             
@@ -251,6 +274,7 @@ namespace ServerController
             {
                 return;
             }
+            // Same direction?
 
             Vector2D moveRequest = cardinalDirections[command.moving];
 
@@ -260,13 +284,11 @@ namespace ServerController
                 Debug.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
                 Console.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
             }
-            else
-            {
-                return;
-            }
+            
 
 
         }
+
 
 
         private void UpdateWorld()
