@@ -303,6 +303,8 @@ namespace ServerController
                     // TODO: maybe copy or move this somewhere?
                     foreach (Snake snake in world.snakes.Values)
                     {
+                        
+                        // snake.MoveSnake(somethings to add)
                         Networking.Send(state.TheSocket, JsonSerializer.Serialize(snake) + "\n");
                     }
 

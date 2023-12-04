@@ -19,6 +19,8 @@ namespace Model
         public string name { get; }
         [JsonInclude]
         public List<Vector2D> body { get; }
+
+        
         [JsonInclude]
         public Vector2D dir { get; set; }
         [JsonInclude]
@@ -120,7 +122,94 @@ namespace Model
             return false;   
         }
 
+        public void MoveSnake(bool DirectionChange, double speed, Vector2D dir)
+        {
+            if (!DirectionChange)
+            {
+                this.body[body.Count - 1] = (this.dir * speed) + this.body[body.Count - 1];
+            }
+            else
+            {
+                // Change direction
+                this.dir = dir;
+                Vector2D NewSnakeHead = (this.dir * speed) + this.body[body.Count - 1];
+                this.body.Add(NewSnakeHead);
 
+            }
+            
+            // Tail logic
+
+            // If tail segment is vertical
+
+            if (this.body[0].X != this.body[1].X)
+            {
+                // Check to see if snake is headed left or right.
+
+                // This is going right
+                if (this.body[0].X < this.body[1].X)
+                {
+
+                    this.body[0].X += speed;
+
+                    // If end of tail segment passes start of tail
+                    if (this.body[0].X >= this.body[1].X)
+                    {
+                        this.body[1].X = this.body[0].X;
+                        // Remove end of tail.
+                        this.body.RemoveAt(0);
+                    }
+                }
+
+                // If snake is going left
+                else
+                {
+
+                    this.body[0].X -= speed;
+
+                    if (this.body[0].X <= this.body[1].X)
+                    {
+                        this.body[1].X = this.body[0].X;
+                        // Remove end of tail.
+                        this.body.RemoveAt(0);
+                    }
+
+                }
+
+            }
+
+            // If tail segment is horizontal
+            else
+            {
+
+                // Check to see if snake is heading down.
+                if (this.body[0].Y < this.body[1].Y)
+                {
+                    this.body[0].Y += speed;
+
+                    if (this.body[0].Y >= this.body[1].Y)
+                    {
+                        this.body[1].Y = this.body[0].Y;
+                        // Remove end of tail.
+                        this.body.RemoveAt(0);
+                    }
+
+                }
+                else
+                {
+                    this.body[0].Y -= speed;
+
+                    if (this.body[0].Y <= this.body[1].Y)
+                    {
+                        this.body[1].Y = this.body[0].Y;
+                        // Remove end of tail.
+                        this.body.RemoveAt(0);
+                    }
+
+                }
+
+
+            }
+        }
 
 
 
