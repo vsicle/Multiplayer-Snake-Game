@@ -18,7 +18,7 @@ namespace Model
         [JsonInclude]
         public string name { get; }
         [JsonInclude]
-        public List<Vector2D> body { get; }
+        public List<Vector2D> body { get; set; }
 
         
         [JsonInclude]
@@ -28,7 +28,7 @@ namespace Model
         [JsonInclude]
         public bool died { get; }
         [JsonInclude]
-        public bool alive { get; }
+        public bool alive { get; set; }
         // Variable to indicate if Snake Client disconnected
         // from server.
         [JsonInclude]
@@ -37,6 +37,8 @@ namespace Model
         // (only true one frame).
         [JsonInclude]
         public bool join { get; }
+
+        public int respawnCounter { get; set; }
 
         [JsonConstructor]
         public Snake(int snake, string name, List<Vector2D> body, Vector2D dir, int score, bool died, bool alive, bool dc, bool join)
@@ -50,6 +52,7 @@ namespace Model
             this.alive = alive;
             this.dc = dc;
             this.join = join;
+            respawnCounter = 0;
         }
 
         /// <summary>
@@ -124,22 +127,68 @@ namespace Model
 
         public void MoveSnake(bool DirectionChange, double speed, Vector2D dir)
         {
-            if (!DirectionChange)
+            //if (!DirectionChange)
+            //{
+            //    this.body[body.Count - 1] = (this.dir * speed) + this.body[body.Count - 1];
+            //}
+            //else
+            //{
+            //    // Change direction
+            //    this.dir = dir;
+            //    Vector2D NewSnakeHead = (this.dir * speed) + this.body[body.Count - 1];
+            //    this.body.Add(NewSnakeHead);
+
+            //}
+
+
+
+
+            // moving head logic 
+            if (this.body[body.Count - 1].X != this.body[body.Count - 2].X)
             {
-                this.body[body.Count - 1] = (this.dir * speed) + this.body[body.Count - 1];
+                // Check to see if snake head is going left or right.
+
+                // This is going right
+                if (this.body[body.Count - 1].X > this.body[body.Count - 2].X)
+                {
+
+                    this.body[body.Count - 1].X += speed;
+
+                }
+
+                // If head is going left
+                else
+                {
+
+                    this.body[body.Count - 1].X -= speed;
+
+                }
+
             }
+            // If head segment is vertical
             else
             {
-                // Change direction
-                this.dir = dir;
-                Vector2D NewSnakeHead = (this.dir * speed) + this.body[body.Count - 1];
-                this.body.Add(NewSnakeHead);
 
+                // Check to see if head is heading down.
+                if (this.body[body.Count - 1].Y > this.body[body.Count - 2].Y)
+                {
+                    this.body[body.Count - 1].Y += speed;
+
+                }
+                else
+                {
+                    this.body[body.Count - 1].Y -= speed;
+
+                }
             }
-            
+
+
+
+
+
             // Tail logic
 
-            // If tail segment is vertical
+            // If tail segment is horizontal
 
             if (this.body[0].X != this.body[1].X)
             {
@@ -160,7 +209,7 @@ namespace Model
                     }
                 }
 
-                // If snake is going left
+                // If tail is going left
                 else
                 {
 
@@ -177,11 +226,11 @@ namespace Model
 
             }
 
-            // If tail segment is horizontal
+            // If tail segment is vertical
             else
             {
 
-                // Check to see if snake is heading down.
+                // Check to see if tail is heading down.
                 if (this.body[0].Y < this.body[1].Y)
                 {
                     this.body[0].Y += speed;

@@ -303,9 +303,49 @@ namespace ServerController
                     // TODO: maybe copy or move this somewhere?
                     foreach (Snake snake in world.snakes.Values)
                     {
-                        
-                        // snake.MoveSnake(somethings to add)
-                        Networking.Send(state.TheSocket, JsonSerializer.Serialize(snake) + "\n");
+                        // check for collisions, kill snake if needed
+                        foreach (Wall wall in world.Walls)
+                        {
+                            if (snake.RectangleCollision(wall.p1, wall.p2, 25))
+                            {
+                                // if snake collides with wall, kill it
+                                snake.alive = false;
+                            }
+                        }
+
+
+
+
+                        // if snake is dead, respwan
+                        if(!snake.alive) 
+                        {
+                            if(snake.respawnCounter >= world.RespawnRate)
+                            {
+                                Random rand = new Random();
+                                double coordinate = (rand.NextDouble() * world.UniverseSize) - world.StartingSnakeLength -
+                                                    (world.UniverseSize / 2.0);
+                                snake.alive = true;
+                                snake.respawnCounter = 0;
+                                snake.body = new List<Vector2D>();
+                                // make tail of snake
+                                snake.body.Add(new Vector2D(coordinate, coordinate - world.StartingSnakeLength));
+                                // make head of snake
+                                snake.body.Add(new Vector2D(coordinate, coordinate));
+                            }
+                            else
+                            {
+                                // increment respawn counter
+                                snake.respawnCounter++;
+                            }
+                        }
+                        else
+                        {
+                            // snake is alive, move it and send it
+
+                            snake.MoveSnake(false, world.SnakeSpeed, new Vector2D(0, -1));
+                            // snake.MoveSnake(somethings to add)
+                            Networking.Send(state.TheSocket, JsonSerializer.Serialize(snake) + "\n");
+                        }
                     }
 
                     foreach (Powerup powerup in world.powerups.Values)
