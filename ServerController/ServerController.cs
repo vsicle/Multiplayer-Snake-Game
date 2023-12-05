@@ -41,8 +41,8 @@ namespace ServerController
             cardinalDirections = new Dictionary<string, Vector2D>();
             cardinalDirections["up"] = new Vector2D(0, -1);
             cardinalDirections["down"] = new Vector2D(0, 1);
-            cardinalDirections["right"] = new Vector2D(-1, 0);
-            cardinalDirections["left"] = new Vector2D(1, 0);
+            cardinalDirections["right"] = new Vector2D(1, 0);
+            cardinalDirections["left"] = new Vector2D(-1, 0);
             ClientMoveRequests = new List<Tuple<long, String>>();
         }
 
@@ -330,6 +330,7 @@ namespace ServerController
                                                     (world.UniverseSize / 2.0);
                                 snake.alive = true;
                                 snake.respawnCounter = 0;
+                                snake.dir = cardinalDirections["down"];
                                 snake.body = new List<Vector2D>();
                                 // make tail of snake
                                 snake.body.Add(new Vector2D(coordinate, coordinate - world.StartingSnakeLength));
