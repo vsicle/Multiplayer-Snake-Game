@@ -88,11 +88,14 @@ namespace ServerController
 
                     lock(server.ClientMoveRequests)
                     {
+                        Debug.WriteLine("Entered lock for movement requests");
                         foreach (Tuple<long, String> ClientRequest in server.ClientMoveRequests)
                         {
                             server.ProcessMovementRequest(ClientRequest.Item2, ClientRequest.Item1);
+                            Debug.WriteLine("Done Processing movement request");
                         }
                         // Clear ClientRequests
+                        Debug.WriteLine("Clearing movement requests");
                         server.ClientMoveRequests.Clear();
 
                     }
@@ -251,11 +254,13 @@ namespace ServerController
 
             if(movementRequests.Count > 0)
             {
+                Debug.WriteLine("We have a movement request");
                 // Add request to List
                 // to prevent trying to modify Snake.dir and 
                 // Serializing snakes
                 lock (ClientMoveRequests)
                 {
+                    Debug.WriteLine("Adding movement request to list");
                     ClientMoveRequests.Add(new Tuple<long, String>(state.ID, movementRequests[0]));
                 }
             }
@@ -280,13 +285,12 @@ namespace ServerController
 
             if (!snake.dir.IsOppositeCardinalDirection(moveRequest))
             {
-                snake.dir = moveRequest;
-                Debug.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
-                Console.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
+                //snake.dir = moveRequest;
+                //Debug.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
+                //Console.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
+                snake.ChangeSnakeDirection(moveRequest, world.SnakeSpeed);
+
             }
-            
-
-
         }
 
 

@@ -260,7 +260,13 @@ namespace Model
             }
         }
 
-
+        public void ChangeSnakeDirection(Vector2D newDir, int snakeSpeed)
+        {
+            Vector2D oldHead = body[body.Count - 1];
+            Vector2D newHead = oldHead + (newDir * (double)snakeSpeed);
+            body.Add(newHead);
+            dir = newDir;
+        }
 
     }
 }
