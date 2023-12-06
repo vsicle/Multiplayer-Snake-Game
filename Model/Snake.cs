@@ -127,7 +127,7 @@ namespace Model
             return false;   
         }
 
-        public void MoveSnake(bool DirectionChange, double speed, Vector2D dir)
+        public void MoveSnake(bool DirectionChange, int speed)
         {
             //if (!DirectionChange)
             //{
@@ -141,9 +141,6 @@ namespace Model
             //    this.body.Add(NewSnakeHead);
 
             //}
-
-
-
 
             // moving head logic 
             if (this.body[body.Count - 1].X != this.body[body.Count - 2].X)
