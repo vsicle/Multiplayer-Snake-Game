@@ -75,6 +75,8 @@ namespace ServerController
 
                 Stopwatch sw = new Stopwatch();
 
+
+
                 while (true)
                 {
                     sw.Start();
@@ -82,7 +84,6 @@ namespace ServerController
                     while (sw.ElapsedMilliseconds < server.world.MSPerFrame) { }
 
                     sw.Restart();
-                    Console.WriteLine("Frame");
 
 
 
@@ -211,7 +212,7 @@ namespace ServerController
                 //Networking.Send(state.TheSocket, world.UniverseSize.ToString() + "\n");
 
                 List<Vector2D> TempBody = new List<Vector2D>();
-                TempBody.Add(new Vector2D(0, -100));
+                TempBody.Add(new Vector2D(0, -world.StartingSnakeLength));
                 TempBody.Add(new Vector2D(0, 0));
 
                 Snake NewSnake = new Snake(numClients, newPlayerName, TempBody, new Vector2D(0, -1), 0, false, true, false, true);
@@ -314,118 +315,125 @@ namespace ServerController
         private void UpdateWorld()
         {
             
-            lock (world)
+            lock (Clients)
             {
+                
                 foreach (SocketState state in Clients)
                 {
-
-                    // send all objects in the current world,
-                    // TODO: maybe copy or move this somewhere?
-                    foreach (Snake snake in world.snakes.Values)
+                    lock (world.snakes) 
                     {
-                        Vector2D HeadDir = snake.dir;
-                        // check for collisions, kill snake if needed
-                        foreach (Wall wall in world.Walls)
+                        // send all objects in the current world,
+                        // TODO: maybe copy or move this somewhere?
+                        foreach (Snake snake in world.snakes.Values)
                         {
-                            if (snake.RectangleCollision(wall.p1, wall.p2, 25))
+                            Vector2D HeadDir = snake.dir;
+                            // check for collisions, kill snake if needed
+                            foreach (Wall wall in world.Walls)
                             {
-                                // if snake collides with wall, kill it
-                                snake.alive = false;
+                                if (snake.RectangleCollision(wall.p1, wall.p2, 25))
+                                {
+                                    // if snake collides with wall, kill it
+                                    snake.alive = false;
+                                }
                             }
-                        }
 
-                        // Find first segment of snake to check against collisions
-                        int StartVertexCollisionCheck = 1;
+                            // Find first segment of snake to check against collisions
+                            int StartVertexCollisionCheck = 1;
 
-                        for (int i = snake.body.Count - 3; i >= 1; i--)
-                        {
-
-                            Vector2D FirstSegment = snake.body[i];
-                            Vector2D SecondSegment = snake.body[i - 1];
-
-                            Vector2D SegmentDir = FirstSegment - SecondSegment;
-                            SegmentDir.Normalize();
-
-                            if (HeadDir.IsOppositeCardinalDirection(SegmentDir))
+                            for (int i = snake.body.Count - 3; i >= 1; i--)
                             {
-                                StartVertexCollisionCheck = i;
-                                break;
-                            }
-                        }
 
-                        if (StartVertexCollisionCheck >= 1 && snake.body.Count > 3)
-                        {
-                            for (int i = StartVertexCollisionCheck; i > 0; i--)
-                            {
                                 Vector2D FirstSegment = snake.body[i];
                                 Vector2D SecondSegment = snake.body[i - 1];
 
                                 Vector2D SegmentDir = FirstSegment - SecondSegment;
                                 SegmentDir.Normalize();
 
-                                if (snake.RectangleCollision(FirstSegment, SecondSegment, 5))
+                                if (HeadDir.IsOppositeCardinalDirection(SegmentDir))
                                 {
-                                    snake.alive = false; break;
+                                    StartVertexCollisionCheck = i;
+                                    break;
                                 }
-
                             }
-                        }
 
-                        
-                        foreach (Snake OtherSnakes in world.snakes.Values)
-                        {
-                            if (OtherSnakes.snake != snake.snake)
+                            if (StartVertexCollisionCheck >= 1 && snake.body.Count > 3)
                             {
-                                for (int i = 1; i < OtherSnakes.body.Count; i++)
+                                for (int i = StartVertexCollisionCheck; i > 0; i--)
                                 {
-                                     
-                                    List<Vector2D> segment = OtherSnakes.body.GetRange(i - 1, 2);
-                                    if (snake.RectangleCollision(segment[0], segment[1], 5.0)) 
+                                    Vector2D FirstSegment = snake.body[i];
+                                    Vector2D SecondSegment = snake.body[i - 1];
+
+                                    Vector2D SegmentDir = FirstSegment - SecondSegment;
+                                    SegmentDir.Normalize();
+
+                                    if (snake.RectangleCollision(FirstSegment, SecondSegment, 5))
                                     {
-                                        snake.alive = false;
+                                        snake.alive = false; break;
+                                    }
+
+                                }
+                            }
+
+
+                            foreach (Snake OtherSnakes in world.snakes.Values)
+                            {
+                                if (OtherSnakes.snake != snake.snake)
+                                {
+                                    for (int i = 1; i < OtherSnakes.body.Count; i++)
+                                    {
+
+                                        List<Vector2D> segment = OtherSnakes.body.GetRange(i - 1, 2);
+                                        if (snake.RectangleCollision(segment[0], segment[1], 5.0))
+                                        {
+                                            snake.alive = false;
+                                        }
                                     }
                                 }
                             }
-                        }
 
 
-                        // if snake is dead, respwan
-                        if(!snake.alive) 
-                        {
-                            if(snake.respawnCounter >= world.RespawnRate)
+                            // if snake is dead, respwan
+                            if (!snake.alive)
                             {
-                                Random rand = new Random();
-                                double coordinate = (rand.NextDouble() * world.UniverseSize) - world.StartingSnakeLength -
-                                                    (world.UniverseSize / 2.0);
-                                snake.alive = true;
-                                snake.respawnCounter = 0;
-                                snake.dir = cardinalDirections["down"];
-                                snake.body = new List<Vector2D>();
-                                // make tail of snake
-                                snake.body.Add(new Vector2D(coordinate, coordinate - world.StartingSnakeLength));
-                                // make head of snake
-                                snake.body.Add(new Vector2D(coordinate, coordinate));
+                                if (snake.respawnCounter >= world.RespawnRate)
+                                {
+                                    Random rand = new Random();
+                                    double coordinate = (rand.NextDouble() * world.UniverseSize) - world.StartingSnakeLength -
+                                                        (world.UniverseSize / 2.0);
+                                    snake.alive = true;
+                                    snake.respawnCounter = 0;
+                                    snake.dir = cardinalDirections["down"];
+                                    snake.body = new List<Vector2D>();
+                                    // make tail of snake
+                                    snake.body.Add(new Vector2D(coordinate, coordinate - world.StartingSnakeLength));
+                                    // make head of snake
+                                    snake.body.Add(new Vector2D(coordinate, coordinate));
+                                }
+                                else
+                                {
+                                    // increment respawn counter
+                                    snake.respawnCounter++;
+                                }
                             }
                             else
                             {
-                                // increment respawn counter
-                                snake.respawnCounter++;
+                                // snake is alive, move it and send it
+
+                                snake.MoveSnake(false, world.SnakeSpeed, new Vector2D(0, -1));
+                                // snake.MoveSnake(somethings to add)
+                                Networking.Send(state.TheSocket, JsonSerializer.Serialize(snake) + "\n");
                             }
                         }
-                        else
+                    }
+                    
+                    lock(world.powerups)
+                    {
+                        foreach (Powerup powerup in world.powerups.Values)
                         {
-                            // snake is alive, move it and send it
-
-                            snake.MoveSnake(false, world.SnakeSpeed, new Vector2D(0, -1));
-                            // snake.MoveSnake(somethings to add)
-                            Networking.Send(state.TheSocket, JsonSerializer.Serialize(snake) + "\n");
+                            Networking.Send(state.TheSocket, JsonSerializer.Serialize(powerup) + "\n");
                         }
                     }
-
-                    foreach (Powerup powerup in world.powerups.Values)
-                    {
-                        Networking.Send(state.TheSocket, JsonSerializer.Serialize(powerup) + "\n");
-                    }
+                    
                 }
                 
             }
