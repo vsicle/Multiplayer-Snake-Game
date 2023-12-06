@@ -86,25 +86,27 @@ namespace Model
                 // If Loc1 is on left.
                 if (Loc1.X < Loc2.X)
                 {
-                    return DoubleAscendingOrder(Loc1.X - RectWidth - 10.0, this.body[body.Count - 1].X, Loc2.X + RectWidth + 10.0) && 
-                        DoubleAscendingOrder(Loc1.Y - RectWidth - 10.0, this.body[body.Count - 1].Y, Loc1.Y + RectWidth + 10.0);
+                    return DoubleAscendingOrder(Loc1.X - RectWidth - 5.0, this.body[body.Count - 1].X, Loc2.X + RectWidth + 5.0) &&
+                        DoubleAscendingOrder(Loc1.Y - RectWidth - 5.0, this.body[body.Count - 1].Y, Loc1.Y + RectWidth + 5.0);
                 }
                 // If Loc2 is on left.
-                return DoubleAscendingOrder(Loc2.X - RectWidth - 10.0, this.body[body.Count - 1].X, Loc1.X + RectWidth + 10.0) && 
-                    DoubleAscendingOrder(Loc1.Y - RectWidth - 10.0, this.body[body.Count - 1].Y, Loc1.Y + RectWidth + 10.0);
-            // If it is a vertical segment.
-            } else
+                return DoubleAscendingOrder(Loc2.X - RectWidth - 5.0, this.body[body.Count - 1].X, Loc1.X + RectWidth + 5.0) &&
+                    DoubleAscendingOrder(Loc1.Y - RectWidth - 5.0, this.body[body.Count - 1].Y, Loc1.Y + RectWidth + 5.0);
+                // If it is a vertical segment.
+            }
+            else
             {
                 // If Loc1 is on top
                 if (Loc1.Y < Loc2.Y)
                 {
-                    return DoubleAscendingOrder(Loc1.Y - RectWidth - 10.0, this.body[body.Count - 1].Y, Loc2.Y + RectWidth + 10.0) &&
-                        DoubleAscendingOrder(Loc1.X - RectWidth - 10.0, this.body[body.Count - 1].X, Loc1.X + RectWidth + 10.0);
+                    return DoubleAscendingOrder(Loc1.Y - RectWidth - 5.0, this.body[body.Count - 1].Y, Loc2.Y + RectWidth + 5.0) &&
+                        DoubleAscendingOrder(Loc1.X - RectWidth - 5.0, this.body[body.Count - 1].X, Loc1.X + RectWidth + 5.0);
                 }
                 // If Loc2 is on top.
-                return DoubleAscendingOrder(Loc2.Y - RectWidth - 10.0, this.body[body.Count - 1].Y, Loc1.Y + RectWidth + 10.0) &&
-                    DoubleAscendingOrder(Loc1.X - RectWidth - 10.0, this.body[body.Count - 1].X, Loc1.X + RectWidth + 10.0);
+                return DoubleAscendingOrder(Loc2.Y - RectWidth - 5.0, this.body[body.Count - 1].Y, Loc1.Y + RectWidth + 5.0) &&
+                    DoubleAscendingOrder(Loc1.X - RectWidth - 5.0, this.body[body.Count - 1].X, Loc1.X + RectWidth + 5.0);
             }
+
         }
 
         /// <summary>

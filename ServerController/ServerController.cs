@@ -248,7 +248,15 @@ namespace ServerController
         private void NormalOp(SocketState state)
         {
             if (state.ErrorOccurred)
+            {
+                lock (world.snakes)
+                {
+                    world.snakes.Remove(IdMap[state.ID]);
+                }
+                Console.WriteLine("Client " +  state.ID + " disconnected");
                 return;
+            }
+                
 
             List<string> movementRequests = BuildIncomingData(state);
 
@@ -265,32 +273,45 @@ namespace ServerController
                 }
             }
 
-            
+            Networking.GetData(state);
+
         }
 
         private void ProcessMovementRequest(string request, long stateId)
         {
-            int snakeId = IdMap[stateId];
-
-            Snake snake = world.snakes[snakeId];
-
-            CtrlCommand? command = JsonSerializer.Deserialize<CtrlCommand>(request);
-            if(command == null)
+            lock (world)
             {
-                return;
+                int snakeId = IdMap[stateId];
+
+                Snake snake = world.snakes[snakeId];
+
+                CtrlCommand? command = JsonSerializer.Deserialize<CtrlCommand>(request);
+                if (command == null)
+                {
+                    return;
+                }
+
+                Vector2D moveRequest = cardinalDirections[command.moving];
+
+                // If command is same as snake's current direction, 
+                // ignore request.
+                if (moveRequest.Equals(snake.dir)) { return; }
+
+                // Find out how long Snake head segment is.
+                Vector2D HeadSegment = snake.body[snake.body.Count - 1] - snake.body[snake.body.Count - 2];
+
+                // If movement request is not opposite cardinal direction & head segment is sufficiently long
+                // enough (to avoid snake 180 self collisions), change snake direction.
+                if (!snake.dir.IsOppositeCardinalDirection(moveRequest) && HeadSegment.Length() > 10.0)
+                {
+                    //snake.dir = moveRequest;
+                    //Debug.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
+                    //Console.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
+                    snake.ChangeSnakeDirection(moveRequest, world.SnakeSpeed);
+
+                }
             }
-            // Same direction?
-
-            Vector2D moveRequest = cardinalDirections[command.moving];
-
-            if (!snake.dir.IsOppositeCardinalDirection(moveRequest))
-            {
-                //snake.dir = moveRequest;
-                //Debug.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
-                //Console.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
-                snake.ChangeSnakeDirection(moveRequest, world.SnakeSpeed);
-
-            }
+            
         }
 
 
@@ -307,6 +328,7 @@ namespace ServerController
                     // TODO: maybe copy or move this somewhere?
                     foreach (Snake snake in world.snakes.Values)
                     {
+                        Vector2D HeadDir = snake.dir;
                         // check for collisions, kill snake if needed
                         foreach (Wall wall in world.Walls)
                         {
@@ -317,7 +339,38 @@ namespace ServerController
                             }
                         }
 
+                        for (int i = snake.body.Count-3; i >= 1; i--)
+                        {
+                            Vector2D FirstSegment = snake.body[i];
+                            Vector2D SecondSegment = snake.body[i-1];
 
+                            Vector2D SegmentDir = FirstSegment - SecondSegment;
+                            SegmentDir.Normalize();
+
+                            if (HeadDir.IsOppositeCardinalDirection(SegmentDir))
+                            {
+                                if(snake.RectangleCollision(FirstSegment, SecondSegment, 5))
+                                {
+                                    snake.alive = false; break;
+                                }
+
+                            }
+                        }
+
+                        foreach (Snake OtherSnakes in world.snakes.Values)
+                        {
+                            if (OtherSnakes.snake != snake.snake)
+                            {
+                                for (int i = 1; i < OtherSnakes.body.Count; i++)
+                                {
+                                    List<Vector2D> segment = snake.body.GetRange(i - 1, 2);
+                                    if (snake.RectangleCollision(segment[0], segment[1], 5.0)) 
+                                    {
+                                        snake.alive = false;
+                                    }
+                                }
+                            }
+                        }
 
 
                         // if snake is dead, respwan
