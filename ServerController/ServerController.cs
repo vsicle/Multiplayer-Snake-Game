@@ -88,14 +88,14 @@ namespace ServerController
 
                     lock(server.ClientMoveRequests)
                     {
-                        Debug.WriteLine("Entered lock for movement requests");
+                        
                         foreach (Tuple<long, String> ClientRequest in server.ClientMoveRequests)
                         {
                             server.ProcessMovementRequest(ClientRequest.Item2, ClientRequest.Item1);
-                            Debug.WriteLine("Done Processing movement request");
+                            
                         }
                         // Clear ClientRequests
-                        Debug.WriteLine("Clearing movement requests");
+                        
                         server.ClientMoveRequests.Clear();
 
                     }
@@ -203,22 +203,26 @@ namespace ServerController
 
             // save player ID in Dictionary?
 
-            Networking.Send(state.TheSocket, numClients + "\n" + world.UniverseSize.ToString() + "\n");
-            //Networking.Send(state.TheSocket, world.UniverseSize.ToString() + "\n");
+            
 
-            List<Vector2D> TempBody = new List<Vector2D>();
-            TempBody.Add(new Vector2D(0, -100));
-            TempBody.Add(new Vector2D(0, 0));
+            lock(world) {
 
+                Networking.Send(state.TheSocket, numClients + "\n" + world.UniverseSize.ToString() + "\n");
+                //Networking.Send(state.TheSocket, world.UniverseSize.ToString() + "\n");
 
-            Snake NewSnake = new Snake(numClients, newPlayerName, TempBody, new Vector2D(0, -1), 0, false, true, false, true);
-            world.snakes.Add(numClients, NewSnake);
+                List<Vector2D> TempBody = new List<Vector2D>();
+                TempBody.Add(new Vector2D(0, -100));
+                TempBody.Add(new Vector2D(0, 0));
 
-            lock (world)
+                Snake NewSnake = new Snake(numClients, newPlayerName, TempBody, new Vector2D(0, -1), 0, false, true, false, true);
+                world.snakes.Add(numClients, NewSnake);
+            }
+            
+
+            lock (world.Walls)
             {
                 foreach (Wall wall in world.Walls)
                 {
-                    Debug.WriteLine(JsonSerializer.Serialize(wall) + "\n");
                     Networking.Send(state.TheSocket, JsonSerializer.Serialize(wall) + "\n");
                 }
                 
@@ -250,13 +254,12 @@ namespace ServerController
 
             if(movementRequests.Count > 0)
             {
-                Debug.WriteLine("We have a movement request");
+
                 // Add request to List
                 // to prevent trying to modify Snake.dir and 
                 // Serializing snakes
                 lock (ClientMoveRequests)
                 {
-                    Debug.WriteLine("Adding movement request to list");
                     ClientMoveRequests.Add(new Tuple<long, String>(state.ID, movementRequests[0]));
                 }
             }

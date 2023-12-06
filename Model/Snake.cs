@@ -184,10 +184,6 @@ namespace Model
                 }
             }
 
-
-
-
-
             // Tail logic
 
             // If tail segment is horizontal
