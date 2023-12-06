@@ -279,6 +279,10 @@ namespace ServerController
                     return;
                 }
 
+                if (!cardinalDirections.ContainsKey(command.moving))
+                {
+                    return;
+                }
                 Vector2D moveRequest = cardinalDirections[command.moving];
 
                 // If command is same as snake's current direction, 
@@ -371,7 +375,8 @@ namespace ServerController
                             {
                                 for (int i = 1; i < OtherSnakes.body.Count; i++)
                                 {
-                                    List<Vector2D> segment = snake.body.GetRange(i - 1, 2);
+                                     
+                                    List<Vector2D> segment = OtherSnakes.body.GetRange(i - 1, 2);
                                     if (snake.RectangleCollision(segment[0], segment[1], 5.0)) 
                                     {
                                         snake.alive = false;
