@@ -11,6 +11,7 @@ using SnakeGame;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
+using System.Xml.Linq;
 
 namespace ServerController
 {
@@ -324,7 +325,15 @@ namespace ServerController
             
             lock (Clients)
             {
+                lock (world)
+                {
+                    foreach (Snake snake in world.snakes.Values)
+                    {
+                        snake.MoveSnake(world.SnakeSpeed);
+                    }
+                }
                 
+
                 foreach (SocketState state in Clients)
                 {
                     lock (world.snakes) 
@@ -426,7 +435,7 @@ namespace ServerController
                             {
                                 // snake is alive, move it and send it
 
-                                snake.MoveSnake(false, world.SnakeSpeed, new Vector2D(0, -1));
+                                
                                 // snake.MoveSnake(somethings to add)
                                 Networking.Send(state.TheSocket, JsonSerializer.Serialize(snake) + "\n");
                             }

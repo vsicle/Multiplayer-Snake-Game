@@ -127,20 +127,9 @@ namespace Model
             return false;   
         }
 
-        public void MoveSnake(bool DirectionChange, int speed)
+        public void MoveSnake(int speed)
         {
-            //if (!DirectionChange)
-            //{
-            //    this.body[body.Count - 1] = (this.dir * speed) + this.body[body.Count - 1];
-            //}
-            //else
-            //{
-            //    // Change direction
-            //    this.dir = dir;
-            //    Vector2D NewSnakeHead = (this.dir * speed) + this.body[body.Count - 1];
-            //    this.body.Add(NewSnakeHead);
-
-            //}
+            
 
             // moving head logic 
             if (this.body[body.Count - 1].X != this.body[body.Count - 2].X)
