@@ -327,17 +327,36 @@ namespace ServerController
                             }
                         }
 
-                        for (int i = snake.body.Count-3; i >= 1; i--)
+                        // Find first segment of snake to check against collisions
+                        int StartVertexCollisionCheck = 1;
+
+                        for (int i = snake.body.Count - 3; i >= 1; i--)
                         {
+
                             Vector2D FirstSegment = snake.body[i];
-                            Vector2D SecondSegment = snake.body[i-1];
+                            Vector2D SecondSegment = snake.body[i - 1];
 
                             Vector2D SegmentDir = FirstSegment - SecondSegment;
                             SegmentDir.Normalize();
 
                             if (HeadDir.IsOppositeCardinalDirection(SegmentDir))
                             {
-                                if(snake.RectangleCollision(FirstSegment, SecondSegment, 5))
+                                StartVertexCollisionCheck = i;
+                                break;
+                            }
+                        }
+
+                        if (StartVertexCollisionCheck >= 1 && snake.body.Count > 3)
+                        {
+                            for (int i = StartVertexCollisionCheck; i > 0; i--)
+                            {
+                                Vector2D FirstSegment = snake.body[i];
+                                Vector2D SecondSegment = snake.body[i - 1];
+
+                                Vector2D SegmentDir = FirstSegment - SecondSegment;
+                                SegmentDir.Normalize();
+
+                                if (snake.RectangleCollision(FirstSegment, SecondSegment, 5))
                                 {
                                     snake.alive = false; break;
                                 }
@@ -345,6 +364,7 @@ namespace ServerController
                             }
                         }
 
+                        
                         foreach (Snake OtherSnakes in world.snakes.Values)
                         {
                             if (OtherSnakes.snake != snake.snake)
