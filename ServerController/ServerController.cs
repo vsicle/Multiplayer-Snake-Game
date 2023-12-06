@@ -75,17 +75,24 @@ namespace ServerController
 
                 Stopwatch sw = new Stopwatch();
 
-
+                int FPSCounter = 0;
 
                 while (true)
                 {
+                    
                     sw.Start();
 
-                    while (sw.ElapsedMilliseconds < server.world.MSPerFrame) { }
+                    while (sw.ElapsedMilliseconds < (long)server.world.MSPerFrame) { }
 
                     sw.Restart();
 
+                    FPSCounter++;
 
+                    if (FPSCounter >= 3)
+                    {
+                        FPSCounter = 0;
+                        Console.WriteLine("FPS: " + server.world.MSPerFrame);
+                    }
 
                     lock(server.ClientMoveRequests)
                     {
@@ -209,7 +216,7 @@ namespace ServerController
             lock(world) {
 
                 Networking.Send(state.TheSocket, numClients + "\n" + world.UniverseSize.ToString() + "\n");
-                //Networking.Send(state.TheSocket, world.UniverseSize.ToString() + "\n");
+               
 
                 List<Vector2D> TempBody = new List<Vector2D>();
                 TempBody.Add(new Vector2D(0, -world.StartingSnakeLength));
@@ -398,8 +405,8 @@ namespace ServerController
                                 if (snake.respawnCounter >= world.RespawnRate)
                                 {
                                     Random rand = new Random();
-                                    double coordinate = (rand.NextDouble() * world.UniverseSize) - world.StartingSnakeLength -
-                                                        (world.UniverseSize / 2.0);
+                                    int RandCoord = rand.Next(-((world.UniverseSize - world.StartingSnakeLength) / 2), ((world.UniverseSize - world.StartingSnakeLength) / 2));
+                                    double coordinate = (double)RandCoord;
                                     snake.alive = true;
                                     snake.respawnCounter = 0;
                                     snake.dir = cardinalDirections["down"];
