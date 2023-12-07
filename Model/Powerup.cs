@@ -18,7 +18,7 @@ namespace Model
         public Vector2D loc {get;}
 
         [JsonInclude]
-        public bool died {get;}
+        public bool died { get; set; }
 
         [JsonConstructor]
         public Powerup(int power, Vector2D loc, bool died)

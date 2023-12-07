@@ -38,6 +38,11 @@ namespace Model
         [JsonInclude]
         public bool join { get; }
 
+        // Counter for Snakes growing
+        public int SnakeGrowCounter { get; set; }
+
+        public bool IsGrowing { get; set; }
+
         public int respawnCounter { get; set; }
 
         [JsonConstructor]
@@ -53,6 +58,7 @@ namespace Model
             this.dc = dc;
             this.join = join;
             respawnCounter = 0;
+            SnakeGrowCounter = 0;
         }
 
         /// <summary>
@@ -62,7 +68,7 @@ namespace Model
         /// <returns>True if snake head & powerup location are within drawing range, false otherwise </returns>
         public bool PowerUpCollision(Vector2D PowerUpLoc)
         {
-            if ((PowerUpLoc - this.body[body.Count-1]).Length() <= 26.0)
+            if ((PowerUpLoc - this.body[body.Count-1]).Length() <= 13.0)
             {
                 return true;
             }
@@ -172,76 +178,81 @@ namespace Model
 
             // Tail logic
 
-            // If tail segment is horizontal
-
-            if (this.body[0].X != this.body[1].X)
+            if (!IsGrowing)
             {
-                // Check to see if snake is headed left or right.
+                // If tail segment is horizontal
 
-                // This is going right
-                if (this.body[0].X < this.body[1].X)
+                if (this.body[0].X != this.body[1].X)
                 {
+                    // Check to see if snake is headed left or right.
 
-                    this.body[0].X += speed;
-
-                    // If end of tail segment passes start of tail
-                    if (this.body[0].X >= this.body[1].X)
+                    // This is going right
+                    if (this.body[0].X < this.body[1].X)
                     {
-                        this.body[1].X = this.body[0].X;
-                        // Remove end of tail.
-                        this.body.RemoveAt(0);
+
+                        this.body[0].X += speed;
+
+                        // If end of tail segment passes start of tail
+                        if (this.body[0].X >= this.body[1].X)
+                        {
+                            this.body[1].X = this.body[0].X;
+                            // Remove end of tail.
+                            this.body.RemoveAt(0);
+                        }
                     }
+
+                    // If tail is going left
+                    else
+                    {
+
+                        this.body[0].X -= speed;
+
+                        if (this.body[0].X <= this.body[1].X)
+                        {
+                            this.body[1].X = this.body[0].X;
+                            // Remove end of tail.
+                            this.body.RemoveAt(0);
+                        }
+
+                    }
+
                 }
 
-                // If tail is going left
+                // If tail segment is vertical
                 else
                 {
 
-                    this.body[0].X -= speed;
-
-                    if (this.body[0].X <= this.body[1].X)
+                    // Check to see if tail is heading down.
+                    if (this.body[0].Y < this.body[1].Y)
                     {
-                        this.body[1].X = this.body[0].X;
-                        // Remove end of tail.
-                        this.body.RemoveAt(0);
+                        this.body[0].Y += speed;
+
+                        if (this.body[0].Y >= this.body[1].Y)
+                        {
+                            this.body[1].Y = this.body[0].Y;
+                            // Remove end of tail.
+                            this.body.RemoveAt(0);
+                        }
+
+                    }
+                    else
+                    {
+                        this.body[0].Y -= speed;
+
+                        if (this.body[0].Y <= this.body[1].Y)
+                        {
+                            this.body[1].Y = this.body[0].Y;
+                            // Remove end of tail.
+                            this.body.RemoveAt(0);
+                        }
+
                     }
 
-                }
 
+                }
             }
 
-            // If tail segment is vertical
-            else
-            {
-
-                // Check to see if tail is heading down.
-                if (this.body[0].Y < this.body[1].Y)
-                {
-                    this.body[0].Y += speed;
-
-                    if (this.body[0].Y >= this.body[1].Y)
-                    {
-                        this.body[1].Y = this.body[0].Y;
-                        // Remove end of tail.
-                        this.body.RemoveAt(0);
-                    }
-
-                }
-                else
-                {
-                    this.body[0].Y -= speed;
-
-                    if (this.body[0].Y <= this.body[1].Y)
-                    {
-                        this.body[1].Y = this.body[0].Y;
-                        // Remove end of tail.
-                        this.body.RemoveAt(0);
-                    }
-
-                }
-
-
-            }
+                
         }
 
         public void ChangeSnakeDirection(Vector2D newDir, int snakeSpeed)

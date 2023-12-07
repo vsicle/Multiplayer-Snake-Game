@@ -26,10 +26,13 @@ namespace ServerController
         private int numClients;
         private List<Tuple<long, String>> ClientMoveRequests;
 
+        // Counters for spawning powerups
         private int PowerUpCounter;
         private int RandPowerUpDelay;
         private bool WaitingPowerUp;
         private int NumPowerUps;
+
+        
 
         //private string TempPlayerName;
 
@@ -334,9 +337,66 @@ namespace ServerController
                     foreach (Snake snake in world.snakes.Values)
                     {
                         snake.MoveSnake(world.SnakeSpeed);
+
                     }
                 }
-                
+
+                lock (world.powerups)
+                {
+                    foreach (Powerup powerup in world.powerups.Values)
+                    {
+                        if (powerup.died)
+                        {
+                            world.powerups.Remove(powerup.power);
+                        }
+                    }
+
+                    if (world.powerups.Count < world.MaxPowerups)
+                    {
+
+                        if (!WaitingPowerUp)
+                        {
+                            Random rand = new Random();
+                            RandPowerUpDelay = rand.Next(0, world.PowerupDelay);
+
+                            PowerUpCounter = 0;
+
+                            WaitingPowerUp = true;
+
+                        }
+                        else if (PowerUpCounter >= world.PowerupDelay)
+                        {
+                            Random rand = new Random();
+                            double XCord = (double)rand.Next(-((world.UniverseSize - world.StartingSnakeLength) / 2), ((world.UniverseSize - world.StartingSnakeLength) / 2));
+                            double YCord = (double)rand.Next(-((world.UniverseSize - world.StartingSnakeLength) / 2), ((world.UniverseSize - world.StartingSnakeLength) / 2));
+
+                            Powerup tempPowerup = new Powerup(NumPowerUps, new Vector2D(XCord, YCord), false);
+                            bool WallCollision = false;
+
+                            foreach (Wall wall in world.Walls)
+                            {
+                                if (tempPowerup.RectangleCollision(wall.p1, wall.p2, 25))
+                                {
+                                    WallCollision = true;
+                                }
+                            }
+
+                            if (!WallCollision)
+                            {
+                                world.powerups.Add(NumPowerUps, tempPowerup);
+                                NumPowerUps++;
+                                WaitingPowerUp = false;
+                            }
+
+                        }
+                        else
+                        {
+                            PowerUpCounter++;
+                        }
+
+                    }
+                }
+
 
                 foreach (SocketState state in Clients)
                 {
@@ -346,6 +406,14 @@ namespace ServerController
                         // TODO: maybe copy or move this somewhere?
                         foreach (Snake snake in world.snakes.Values)
                         {
+                            if (snake.IsGrowing && snake.SnakeGrowCounter < world.SnakeGrowth)
+                            {
+                                snake.SnakeGrowCounter++;
+                            } else
+                            {
+                                snake.SnakeGrowCounter = 0;
+                                snake.IsGrowing = false;
+                            }
                             Vector2D HeadDir = snake.dir;
                             // check for collisions, kill snake if needed
                             foreach (Wall wall in world.Walls)
@@ -354,6 +422,16 @@ namespace ServerController
                                 {
                                     // if snake collides with wall, kill it
                                     snake.alive = false;
+                                }
+                            }
+
+                            foreach (Powerup powerup in world.powerups.Values)
+                            {
+                                if(snake.PowerUpCollision(powerup.loc))
+                                {
+                                    powerup.died = true;
+                                    snake.IsGrowing = true;
+                                    
                                 }
                             }
 
@@ -446,62 +524,14 @@ namespace ServerController
                         }
                     }
                     
-                    lock(world.powerups)
-                    {
-                        if (world.powerups.Count < world.MaxPowerups)
-                        {
-
-                            if (!WaitingPowerUp)
-                            {
-                                Random rand = new Random();
-                                RandPowerUpDelay = rand.Next(0, world.PowerupDelay);
-
-                                PowerUpCounter = 0;
-
-                                WaitingPowerUp = true;
-
-                            }
-                            else if (PowerUpCounter >= world.PowerupDelay)
-                            {
-                                Random rand = new Random();
-                                double XCord = (double)rand.Next(-((world.UniverseSize - world.StartingSnakeLength) / 2), ((world.UniverseSize - world.StartingSnakeLength) / 2));
-                                double YCord = (double)rand.Next(-((world.UniverseSize - world.StartingSnakeLength) / 2), ((world.UniverseSize - world.StartingSnakeLength) / 2));
-
-                                Powerup tempPowerup = new Powerup(NumPowerUps, new Vector2D(XCord, YCord), false);
-                                bool WallCollision = false;
-
-                                foreach (Wall wall in world.Walls)
-                                {
-                                    if (tempPowerup.RectangleCollision(wall.p1, wall.p2, 25))
-                                    {
-                                        WallCollision = true;
-                                    }
-                                }
-
-                                if (!WallCollision)
-                                {
-                                    world.powerups.Add(NumPowerUps, tempPowerup);
-                                    NumPowerUps++;
-                                    WaitingPowerUp = false;
-                                }
-
-                            }
-                            else
-                            {
-                                PowerUpCounter++;
-                            }
-
-
-                            foreach (Powerup powerup in world.powerups.Values)
-                            {
-                                Networking.Send(state.TheSocket, JsonSerializer.Serialize(powerup) + "\n");
-
-                            }
-                            
-
-                        }
-                    }
                     
+
+                    foreach (Powerup powerup in world.powerups.Values)
+                    {
+                        Networking.Send(state.TheSocket, JsonSerializer.Serialize(powerup) + "\n");
+
+                    }
+
                 }
                 
             }
