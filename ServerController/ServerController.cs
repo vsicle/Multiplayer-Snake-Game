@@ -26,6 +26,10 @@ namespace ServerController
         private int numClients;
         private List<Tuple<long, String>> ClientMoveRequests;
 
+        private int PowerUpCounter;
+        private int RandPowerUpDelay;
+        private bool WaitingPowerUp;
+        private int NumPowerUps;
 
         //private string TempPlayerName;
 
@@ -444,9 +448,57 @@ namespace ServerController
                     
                     lock(world.powerups)
                     {
-                        foreach (Powerup powerup in world.powerups.Values)
+                        if (world.powerups.Count < world.MaxPowerups)
                         {
-                            Networking.Send(state.TheSocket, JsonSerializer.Serialize(powerup) + "\n");
+
+                            if (!WaitingPowerUp)
+                            {
+                                Random rand = new Random();
+                                RandPowerUpDelay = rand.Next(0, world.PowerupDelay);
+
+                                PowerUpCounter = 0;
+
+                                WaitingPowerUp = true;
+
+                            }
+                            else if (PowerUpCounter >= world.PowerupDelay)
+                            {
+                                Random rand = new Random();
+                                double XCord = (double)rand.Next(-((world.UniverseSize - world.StartingSnakeLength) / 2), ((world.UniverseSize - world.StartingSnakeLength) / 2));
+                                double YCord = (double)rand.Next(-((world.UniverseSize - world.StartingSnakeLength) / 2), ((world.UniverseSize - world.StartingSnakeLength) / 2));
+
+                                Powerup tempPowerup = new Powerup(NumPowerUps, new Vector2D(XCord, YCord), false);
+                                bool WallCollision = false;
+
+                                foreach (Wall wall in world.Walls)
+                                {
+                                    if (tempPowerup.RectangleCollision(wall.p1, wall.p2, 25))
+                                    {
+                                        WallCollision = true;
+                                    }
+                                }
+
+                                if (!WallCollision)
+                                {
+                                    world.powerups.Add(NumPowerUps, tempPowerup);
+                                    NumPowerUps++;
+                                    WaitingPowerUp = false;
+                                }
+
+                            }
+                            else
+                            {
+                                PowerUpCounter++;
+                            }
+
+
+                            foreach (Powerup powerup in world.powerups.Values)
+                            {
+                                Networking.Send(state.TheSocket, JsonSerializer.Serialize(powerup) + "\n");
+
+                            }
+                            
+
                         }
                     }
                     
