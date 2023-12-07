@@ -32,7 +32,7 @@ namespace Model
         // Variable to indicate if Snake Client disconnected
         // from server.
         [JsonInclude]
-        public bool dc { get; }
+        public bool dc { get; set; }
         // Variable indicating if player joined on a frame
         // (only true one frame).
         [JsonInclude]

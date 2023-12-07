@@ -84,22 +84,24 @@ namespace ServerController
                 Stopwatch sw = new Stopwatch();
 
                 int FPSCounter = 0;
+                int PrintCounter = 1000/server.world.MSPerFrame;
+
+                sw.Start();
 
                 while (true)
                 {
                     
-                    sw.Start();
-
+                    
                     while (sw.ElapsedMilliseconds < (long)server.world.MSPerFrame) { }
 
                     sw.Restart();
 
                     FPSCounter++;
 
-                    if (FPSCounter >= 3)
+                    if (FPSCounter >= PrintCounter)
                     {
+                        Console.WriteLine("FPS: " + PrintCounter);
                         FPSCounter = 0;
-                        Console.WriteLine("FPS: " + server.world.MSPerFrame);
                     }
 
                     lock(server.ClientMoveRequests)
@@ -259,7 +261,13 @@ namespace ServerController
             {
                 lock (world.snakes)
                 {
-                    world.snakes.Remove(IdMap[state.ID]);
+                    
+                    Snake? DCSnake = world.snakes.GetValueOrDefault(IdMap[state.ID]);
+                    if (DCSnake != null)
+                    {
+                        DCSnake.dc = true;
+                    }
+
                 }
                 Console.WriteLine("Client " +  state.ID + " disconnected");
                 return;
@@ -336,6 +344,10 @@ namespace ServerController
                 {
                     foreach (Snake snake in world.snakes.Values)
                     {
+                        if (snake.dc)
+                        {
+                            world.snakes.Remove(snake.snake);
+                        }
                         snake.MoveSnake(world.SnakeSpeed);
 
                     }
