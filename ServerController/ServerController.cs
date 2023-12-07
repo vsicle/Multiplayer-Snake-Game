@@ -346,6 +346,13 @@ namespace ServerController
                     {
                         if (snake.dc)
                         {
+                            lock (Clients)
+                            {
+                                foreach (SocketState Client in Clients)
+                                {
+                                    Networking.Send(Client.TheSocket, JsonSerializer.Serialize(snake) + "\n");
+                                }
+                            }
                             world.snakes.Remove(snake.snake);
                         }
                         snake.MoveSnake(world.SnakeSpeed);
