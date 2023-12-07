@@ -47,7 +47,8 @@ PS9
 
 11/26/2023 - Added ServerController and ServerModel projects to SnakeGame solution. Began implementation to read XML server settings.
 
-11/28/2023 - Arranged XML tags in alphabetical order in XML server settings to read in correctly.
+11/28/2023 - Arranged XML tags in alphabetical order in XML server settings to read in correctly. Our XML settings, titled "WorldSettings", is in our
+ServerController\bin\Debug\net7.0 directory.
 
 11/29/2023 - Revised solution structure so Server has its own ServerWorld class in the Model project instead of its own 
 ServerModel project. Added a client connected callback to ServerController so a client receives the state of the world & a 
