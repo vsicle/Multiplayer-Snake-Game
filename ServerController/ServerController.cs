@@ -394,7 +394,7 @@ namespace ServerController
 
                             foreach (Wall wall in world.Walls)
                             {
-                                if (tempPowerup.RectangleCollision(wall.p1, wall.p2, 25))
+                                if (tempPowerup.RectangleCollision(wall.p1, wall.p2, 35))
                                 {
                                     WallCollision = true;
                                 }
@@ -515,16 +515,19 @@ namespace ServerController
                                 if (snake.respawnCounter >= world.RespawnRate)
                                 {
                                     Random rand = new Random();
-                                    int RandCoord = rand.Next(-((world.UniverseSize - world.StartingSnakeLength) / 2), ((world.UniverseSize - world.StartingSnakeLength) / 2));
-                                    double coordinate = (double)RandCoord;
+                                    int RandCord1 = rand.Next(-((world.UniverseSize - world.StartingSnakeLength) / 2), ((world.UniverseSize - world.StartingSnakeLength) / 2));
+                                    int RandCord2 = rand.Next(-((world.UniverseSize - world.StartingSnakeLength) / 2), ((world.UniverseSize - world.StartingSnakeLength) / 2));
+                                    double coordinateX = (double)RandCord1;
+                                    double coordinateY = (double)RandCord2;
+                                    
                                     snake.alive = true;
                                     snake.respawnCounter = 0;
                                     snake.dir = cardinalDirections["down"];
                                     snake.body = new List<Vector2D>();
                                     // make tail of snake
-                                    snake.body.Add(new Vector2D(coordinate, coordinate - world.StartingSnakeLength));
+                                    snake.body.Add(new Vector2D(coordinateX, coordinateY - world.StartingSnakeLength));
                                     // make head of snake
-                                    snake.body.Add(new Vector2D(coordinate, coordinate));
+                                    snake.body.Add(new Vector2D(coordinateX, coordinateY));
                                 }
                                 else
                                 {
