@@ -47,5 +47,22 @@ PS9
 
 11/26/2023 - Added ServerController and ServerModel projects to SnakeGame solution. Began implementation to read XML server settings.
 
-11/28/2023 - Arranged XML tags in alphabetical order in XML server settings to read in correctly.
+11/28/2023 - Arranged XML tags in alphabetical order in XML server settings to read in correctly. Our XML settings, titled "WorldSettings", is in our
+ServerController\bin\Debug\net7.0 directory.
 
+11/29/2023 - Revised solution structure so Server has its own ServerWorld class in the Model project instead of its own 
+ServerModel project. Added a client connected callback to ServerController so a client receives the state of the world & a 
+new snake is created. We began to work on a UpdateWorld method.
+
+11/30/2023 - We began work on a callback method (NormalOp) for Client movement requests with the server, and added some error handling 
+functionality to this callback. We began working on changing snake directions in Snake class.
+
+12/2/2023 - Put Client request movements in a list to be used by ServerController. 
+
+12/3/2023 - Added collision detection methods in Snake class so each snake can detect a collision with a Powerup, Wall or snake segment.
+
+12/6/2023 - Implemented & corrected snake move method in Snake class. Implemented snake self collision checks & stairstepping logic in ServerController.
+Implemented snakes respawning logic in ServerController. Fixed a bug where snakes started moving faster as more Clients got added. 
+
+12/7/2023 - Removed disconnected snakes form ServerWorld. Implemented powerup respawning. Changed snake move method so tail stops growing if 
+collision with powerup detected. Revised snake respawn logic.
