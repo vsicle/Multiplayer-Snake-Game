@@ -1,17 +1,11 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Xml;
+﻿using Model;
 using NetworkUtil;
-using System.Net.Sockets;
-using System.Text.Json.Nodes;
-using System.Text.Json;
-using Model;
 using SnakeGame;
-using System.Runtime.CompilerServices;
+using System.Diagnostics;
+using System.Runtime.Serialization;
+using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Channels;
-using System.Xml.Linq;
+using System.Xml;
 
 namespace ServerController
 {
@@ -32,10 +26,10 @@ namespace ServerController
         private bool WaitingPowerUp;
         private int NumPowerUps;
 
-        
-
-        //private string TempPlayerName;
-
+        /// <summary>
+        /// constructor for a server
+        /// </summary>
+        /// <param name="_world"></param>
         public ServerController(ServerWorld _world)
         {
             IdMap = new Dictionary<long, int>();
@@ -45,7 +39,6 @@ namespace ServerController
             world.powerups = new Dictionary<int, Powerup>();
 
             // fill cardinalDirections dictionary
-            // TODO: make readonly if time allows
             cardinalDirections = new Dictionary<string, Vector2D>();
             cardinalDirections["up"] = new Vector2D(0, -1);
             cardinalDirections["down"] = new Vector2D(0, 1);
@@ -54,8 +47,13 @@ namespace ServerController
             ClientMoveRequests = new List<Tuple<long, String>>();
         }
 
+        /// <summary>
+        /// main method for the server, maintains ticks for framerate
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
+            // read in all XML settings
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.IgnoreWhitespace = true;
             ServerWorld? XMLWorld;
@@ -71,6 +69,7 @@ namespace ServerController
 
             }
 
+            // if the settings were read correctly
             if (XMLWorld != null)
             {
                 while (XMLWorld.MaxPowerups > 100 || XMLWorld.SnakeSpeed > 9 || XMLWorld.StartingSnakeLength > 360 || XMLWorld.SnakeGrowth > 600)
@@ -81,17 +80,19 @@ namespace ServerController
                 ServerController server = new ServerController(XMLWorld);
                 server.StartServer();
 
+                // stopwatch for frame rate
                 Stopwatch sw = new Stopwatch();
 
+                // takes care of printing the framerate
                 int FPSCounter = 0;
-                int PrintCounter = 1000/server.world.MSPerFrame;
+                int PrintCounter = 1000 / server.world.MSPerFrame;
 
                 sw.Start();
 
+                // infinite loop to send out updates
                 while (true)
                 {
-                    
-                    
+
                     while (sw.ElapsedMilliseconds < (long)server.world.MSPerFrame) { }
 
                     sw.Restart();
@@ -104,26 +105,27 @@ namespace ServerController
                         FPSCounter = 0;
                     }
 
-                    lock(server.ClientMoveRequests)
+                    // process movement requests
+                    lock (server.ClientMoveRequests)
                     {
-                        
+
                         foreach (Tuple<long, String> ClientRequest in server.ClientMoveRequests)
                         {
                             server.ProcessMovementRequest(ClientRequest.Item2, ClientRequest.Item1);
-                            
+
                         }
                         // Clear ClientRequests
-                        
+
                         server.ClientMoveRequests.Clear();
 
                     }
-                    
 
+                    // call method that updates everything in the world
                     server.UpdateWorld();
 
                 }
             }
-            
+
 
 
         }
@@ -151,7 +153,7 @@ namespace ServerController
             if (state.ErrorOccurred)
                 return;
 
-            Console.WriteLine("Client connected, ID: "+state.ID);
+            Console.WriteLine("Client connected, ID: " + state.ID);
 
             state.OnNetworkAction = ConnectedCallBack;
             Networking.GetData(state);
@@ -202,9 +204,10 @@ namespace ServerController
         /// <param name="state"></param>
         private void ConnectedCallBack(SocketState state)
         {
-
+            // assemble the data coming in
             List<string> data = BuildIncomingData(state);
 
+            // save the playerName
             string newPlayerName = data[0];
 
             // Save the client state
@@ -216,52 +219,53 @@ namespace ServerController
                 IdMap[state.ID] = numClients;
             }
 
-            // TODO: Send PlayerID, but wasn't sure 
-            // where we should save PlayerID in Server
 
-            // save player ID in Dictionary?
+            lock (world)
+            {
 
-            
-
-            lock(world) {
-
+                // send client ID and universe size
                 Networking.Send(state.TheSocket, numClients + "\n" + world.UniverseSize.ToString() + "\n");
-               
 
+                // create body of snake
                 List<Vector2D> TempBody = new List<Vector2D>();
                 TempBody.Add(new Vector2D(0, -world.StartingSnakeLength));
                 TempBody.Add(new Vector2D(0, 0));
 
+                // create snake
                 Snake NewSnake = new Snake(numClients, newPlayerName, TempBody, new Vector2D(0, -1), 0, false, true, false, true);
+
+                // add the snake to the world
                 world.snakes.Add(numClients, NewSnake);
             }
-            
+
 
             lock (world.Walls)
             {
+                // send every wall, lock is slightly overkill but keeps everything safe
                 foreach (Wall wall in world.Walls)
                 {
                     Networking.Send(state.TheSocket, JsonSerializer.Serialize(wall) + "\n");
                 }
-                
+
             }
 
-            // TODO:
-            // change the state's network action to the 
-            // receive handler so we can process data when something
-            // happens on the network
-            //state.OnNetworkAction = ReceiveMessage;
+            // switch the toCall method to the normal operation method that handles movement requests
             state.OnNetworkAction = NormalOp;
             Networking.GetData(state);
         }
 
+        /// <summary>
+        /// metyhod to handle incomign messages (movement requests)
+        /// </summary>
+        /// <param name="state"></param>
         private void NormalOp(SocketState state)
         {
+            // check for disconnected clients
             if (state.ErrorOccurred)
             {
                 lock (world.snakes)
                 {
-                    
+                    // set the snake to disconnected, so that can be handled later
                     Snake? DCSnake = world.snakes.GetValueOrDefault(IdMap[state.ID]);
                     if (DCSnake != null)
                     {
@@ -269,16 +273,16 @@ namespace ServerController
                     }
 
                 }
-                Console.WriteLine("Client " +  state.ID + " disconnected");
+                Console.WriteLine("Client " + state.ID + " disconnected");
                 return;
             }
-                
 
+            // assemble the incoming message
             List<string> movementRequests = BuildIncomingData(state);
 
-            if(movementRequests.Count > 0)
+            // if theres more than zero movement requests add them to the list of movement requests
+            if (movementRequests.Count > 0)
             {
-
                 // Add request to List
                 // to prevent trying to modify Snake.dir and 
                 // Serializing snakes
@@ -288,24 +292,33 @@ namespace ServerController
                 }
             }
 
+            // start recieving data
             Networking.GetData(state);
 
         }
 
+        /// <summary>
+        /// deal with movement requests
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="stateId"></param>
         private void ProcessMovementRequest(string request, long stateId)
         {
             lock (world)
             {
+                // look up the snake in the map of ID's
                 int snakeId = IdMap[stateId];
 
                 Snake snake = world.snakes[snakeId];
 
+                // deserialize the command
                 CtrlCommand? command = JsonSerializer.Deserialize<CtrlCommand>(request);
                 if (command == null)
                 {
                     return;
                 }
 
+                // see if its a valid command
                 if (!cardinalDirections.ContainsKey(command.moving))
                 {
                     return;
@@ -323,56 +336,64 @@ namespace ServerController
                 // enough (to avoid snake 180 self collisions), change snake direction.
                 if (!snake.dir.IsOppositeCardinalDirection(moveRequest) && HeadSegment.Length() > 10.0)
                 {
-                    //snake.dir = moveRequest;
-                    //Debug.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
-                    //Console.WriteLine("Changed snake dir to: "+ moveRequest.ToString());
                     snake.ChangeSnakeDirection(moveRequest, world.SnakeSpeed);
 
                 }
             }
-            
+
         }
 
 
-
+        /// <summary>
+        /// The method that updates the world, checks for collisions, powerups, disconnected snakes, etc.
+        /// </summary>
         private void UpdateWorld()
         {
-            
+
             lock (Clients)
             {
                 lock (world)
                 {
                     foreach (Snake snake in world.snakes.Values)
                     {
+                        // check all snakes for disconnection
                         if (snake.dc)
                         {
                             lock (Clients)
                             {
                                 foreach (SocketState Client in Clients)
                                 {
+                                    // send the disconnected snake
                                     Networking.Send(Client.TheSocket, JsonSerializer.Serialize(snake) + "\n");
                                 }
                             }
+                            // remove the disconnected snake
                             world.snakes.Remove(snake.snake);
                         }
+
+                        // if snake is not disconnected move it in the direction its facing
                         snake.MoveSnake(world.SnakeSpeed);
 
                     }
                 }
 
+
                 lock (world.powerups)
                 {
                     foreach (Powerup powerup in world.powerups.Values)
                     {
+                        // see if powerup has been consumed
                         if (powerup.died)
                         {
+                            // remove the powerup from the list if its been consumed
                             world.powerups.Remove(powerup.power);
                         }
                     }
 
+                    // if theres less powerups than the max then get a delay and generate them accordingly
                     if (world.powerups.Count < world.MaxPowerups)
                     {
-
+                        // if its time to start a waiting period start it
                         if (!WaitingPowerUp)
                         {
                             Random rand = new Random();
@@ -383,6 +404,7 @@ namespace ServerController
                             WaitingPowerUp = true;
 
                         }
+                        // if the delay is up, spawn a powerup in a random location
                         else if (PowerUpCounter >= world.PowerupDelay)
                         {
                             Random rand = new Random();
@@ -392,6 +414,7 @@ namespace ServerController
                             Powerup tempPowerup = new Powerup(NumPowerUps, new Vector2D(XCord, YCord), false);
                             bool WallCollision = false;
 
+                            // see if the location conflicts with a wall
                             foreach (Wall wall in world.Walls)
                             {
                                 if (tempPowerup.RectangleCollision(wall.p1, wall.p2, 35))
@@ -400,6 +423,7 @@ namespace ServerController
                                 }
                             }
 
+                            // if it deosnt conflict with a wall spawn it
                             if (!WallCollision)
                             {
                                 world.powerups.Add(NumPowerUps, tempPowerup);
@@ -410,25 +434,27 @@ namespace ServerController
                         }
                         else
                         {
+                            // waiting for timer, increment it
                             PowerUpCounter++;
                         }
 
                     }
                 }
 
-
+                // for every client
                 foreach (SocketState state in Clients)
                 {
-                    lock (world.snakes) 
+                    lock (world.snakes)
                     {
-                        // send all objects in the current world,
-                        // TODO: maybe copy or move this somewhere?
+                        // send all objects in the current world
                         foreach (Snake snake in world.snakes.Values)
                         {
+                            // grow snake if needed
                             if (snake.IsGrowing && snake.SnakeGrowCounter < world.SnakeGrowth)
                             {
                                 snake.SnakeGrowCounter++;
-                            } else
+                            }
+                            else
                             {
                                 snake.SnakeGrowCounter = 0;
                                 snake.IsGrowing = false;
@@ -444,17 +470,18 @@ namespace ServerController
                                 }
                             }
 
+                            // send out powerups
                             foreach (Powerup powerup in world.powerups.Values)
                             {
-                                if(snake.PowerUpCollision(powerup.loc))
+                                if (snake.PowerUpCollision(powerup.loc))
                                 {
                                     powerup.died = true;
                                     snake.IsGrowing = true;
-                                    
+
                                 }
                             }
 
-                            // Find first segment of snake to check against collisions
+                            // Collision checking snake to self
                             int StartVertexCollisionCheck = 1;
 
                             for (int i = snake.body.Count - 3; i >= 1; i--)
@@ -473,6 +500,7 @@ namespace ServerController
                                 }
                             }
 
+                            // check head to body collisions for a snake to itself
                             if (StartVertexCollisionCheck >= 1 && snake.body.Count > 3)
                             {
                                 for (int i = StartVertexCollisionCheck; i > 0; i--)
@@ -491,7 +519,7 @@ namespace ServerController
                                 }
                             }
 
-
+                            // collision checking head to other snake segments
                             foreach (Snake OtherSnakes in world.snakes.Values)
                             {
                                 if (OtherSnakes.snake != snake.snake)
@@ -519,7 +547,7 @@ namespace ServerController
                                     int RandCord2 = rand.Next(-((world.UniverseSize - world.StartingSnakeLength) / 2), ((world.UniverseSize - world.StartingSnakeLength) / 2));
                                     double coordinateX = (double)RandCord1;
                                     double coordinateY = (double)RandCord2;
-                                    
+
                                     snake.alive = true;
                                     snake.respawnCounter = 0;
                                     snake.dir = cardinalDirections["down"];
@@ -538,26 +566,18 @@ namespace ServerController
                             else
                             {
                                 // snake is alive, move it and send it
-
-                                
-                                // snake.MoveSnake(somethings to add)
                                 Networking.Send(state.TheSocket, JsonSerializer.Serialize(snake) + "\n");
                             }
                         }
                     }
-                    
-                    
 
+                    // send all powerups
                     foreach (Powerup powerup in world.powerups.Values)
                     {
                         Networking.Send(state.TheSocket, JsonSerializer.Serialize(powerup) + "\n");
-
                     }
-
                 }
-                
             }
-
         }
     }
 }

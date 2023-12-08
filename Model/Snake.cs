@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using SnakeGame;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-
-using SnakeGame;
 
 namespace Model
 {
-   
+
     ///  Class to represent Snakes in World.       
     public class Snake
     {
@@ -20,7 +14,7 @@ namespace Model
         [JsonInclude]
         public List<Vector2D> body { get; set; }
 
-        
+
         [JsonInclude]
         public Vector2D dir { get; set; }
         [JsonInclude]
@@ -68,7 +62,7 @@ namespace Model
         /// <returns>True if snake head & powerup location are within drawing range, false otherwise </returns>
         public bool PowerUpCollision(Vector2D PowerUpLoc)
         {
-            if ((PowerUpLoc - this.body[body.Count-1]).Length() <= 13.0)
+            if ((PowerUpLoc - this.body[body.Count - 1]).Length() <= 13.0)
             {
                 return true;
             }
@@ -83,7 +77,6 @@ namespace Model
         /// <param name="Loc2">One of two Snake or Wall coordinates.</param>
         /// <param name="RectWidth">Snake or Wall width.</param>
         /// <returns>True if snake head is within boundary, false otherwise.</returns>
-
         public bool RectangleCollision(Vector2D Loc1, Vector2D Loc2, double RectWidth)
         {
             // Check if it is a horizontal segment.
@@ -112,7 +105,6 @@ namespace Model
                 return DoubleAscendingOrder(Loc2.Y - RectWidth - 5.0, this.body[body.Count - 1].Y, Loc1.Y + RectWidth + 5.0) &&
                     DoubleAscendingOrder(Loc1.X - RectWidth - 5.0, this.body[body.Count - 1].X, Loc1.X + RectWidth + 5.0);
             }
-
         }
 
         /// <summary>
@@ -123,19 +115,22 @@ namespace Model
         /// <param name="two"></param>
         /// <param name="three"></param>
         /// <returns>True if one <= two <= three, false otherwise.</returns>
-
         private bool DoubleAscendingOrder(double one, double two, double three)
         {
             if ((one <= two) && (two <= three))
             {
                 return true;
             }
-            return false;   
+            return false;
         }
 
+        /// <summary>
+        /// method to move snakes in whatever direction it is moving, 
+        /// stops moving the tail if its growing
+        /// </summary>
+        /// <param name="speed"></param>
         public void MoveSnake(int speed)
         {
-            
 
             // moving head logic 
             if (this.body[body.Count - 1].X != this.body[body.Count - 2].X)
@@ -145,17 +140,13 @@ namespace Model
                 // This is going right
                 if (this.body[body.Count - 1].X > this.body[body.Count - 2].X)
                 {
-
                     this.body[body.Count - 1].X += speed;
-
                 }
 
                 // If head is going left
                 else
                 {
-
                     this.body[body.Count - 1].X -= speed;
-
                 }
 
             }
@@ -167,21 +158,17 @@ namespace Model
                 if (this.body[body.Count - 1].Y > this.body[body.Count - 2].Y)
                 {
                     this.body[body.Count - 1].Y += speed;
-
                 }
                 else
                 {
                     this.body[body.Count - 1].Y -= speed;
-
                 }
             }
 
             // Tail logic
-
             if (!IsGrowing)
             {
                 // If tail segment is horizontal
-
                 if (this.body[0].X != this.body[1].X)
                 {
                     // Check to see if snake is headed left or right.
@@ -204,7 +191,6 @@ namespace Model
                     // If tail is going left
                     else
                     {
-
                         this.body[0].X -= speed;
 
                         if (this.body[0].X <= this.body[1].X)
@@ -213,9 +199,7 @@ namespace Model
                             // Remove end of tail.
                             this.body.RemoveAt(0);
                         }
-
                     }
-
                 }
 
                 // If tail segment is vertical
@@ -227,34 +211,35 @@ namespace Model
                     {
                         this.body[0].Y += speed;
 
+                        // if tail reaches an end 
                         if (this.body[0].Y >= this.body[1].Y)
                         {
                             this.body[1].Y = this.body[0].Y;
                             // Remove end of tail.
                             this.body.RemoveAt(0);
                         }
-
                     }
                     else
                     {
                         this.body[0].Y -= speed;
 
+                        // if tail reaches end
                         if (this.body[0].Y <= this.body[1].Y)
                         {
                             this.body[1].Y = this.body[0].Y;
                             // Remove end of tail.
                             this.body.RemoveAt(0);
                         }
-
                     }
-
-
                 }
             }
-
-                
         }
 
+        /// <summary>
+        /// Change the direction in which the snake is moving by adding a segment
+        /// </summary>
+        /// <param name="newDir"></param>
+        /// <param name="snakeSpeed"></param>
         public void ChangeSnakeDirection(Vector2D newDir, int snakeSpeed)
         {
             Vector2D oldHead = body[body.Count - 1];
@@ -262,6 +247,5 @@ namespace Model
             body.Add(newHead);
             dir = newDir;
         }
-
     }
 }
