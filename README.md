@@ -1,5 +1,17 @@
-# game-giterdone_game By Eric Nee & Vasko VASSILEV
-game-giterdone_game created by GitHub Classroom
+# Multiplayer Snake game
+By Eric Nee & Vasil Vassilev
+
+This project was completed with some use of pair-programming, commits don't neccesarily indicate
+who came up with/wrote the code, only who's computer that code was pushed from.
+
+This game uses MVC architecture for elegant seperation of concerns. It is comprised of 
+a server and client, the server is responsible for maintaing the state of the world, sending 
+updates about the world state to clients, and processing incoming movement requests. 
+The client is responsible for sending movement requests, parsing incoming JSON from the server, 
+accepting player movement commands, and drawing the state of the world centered around the player's
+"head".
+
+
 PS7
   11/3
     - Implemented StartServer, ConnectToServer methods & their callbacks
